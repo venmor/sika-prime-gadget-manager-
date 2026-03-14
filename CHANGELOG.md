@@ -59,3 +59,11 @@ All notable changes to this project will be documented in this file. The format 
 * Implemented form submission logic in `forms.js` which collects all form data (including uploaded images) via `FormData`, sends a POST request to `/api/gadgets`, handles the response, and redirects back to the inventory page on success.
 * Updated `add-gadget.html` to include the script (already linked in Section 5) which now provides dynamic behaviour.
 
+## [Section 7] – Inventory listing and CRUD
+### Added
+
+* Implemented `frontend/public/js/main.js` which fetches gadgets from the backend, renders them as cards in the inventory page, and wires up edit and delete actions. It supports filtering by type, status and search text through query parameters.
+* Added placeholder image handling in `main.js` and corresponding CSS for `.no-image` cards when gadgets have no uploaded image.
+* Enhanced `frontend/public/js/forms.js` to support editing an existing gadget. The script now detects an `id` query parameter, fetches gadget details to prefill the form (including spec fields), and dynamically chooses between `POST` (create) and `PUT` (update) requests on submission.
+* Added additional styling to `card.css` for `.no-image` placeholders.
+
