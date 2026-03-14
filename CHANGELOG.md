@@ -67,3 +67,13 @@ All notable changes to this project will be documented in this file. The format 
 * Enhanced `frontend/public/js/forms.js` to support editing an existing gadget. The script now detects an `id` query parameter, fetches gadget details to prefill the form (including spec fields), and dynamically chooses between `POST` (create) and `PUT` (update) requests on submission.
 * Added additional styling to `card.css` for `.no-image` placeholders.
 
+## [Section 8] – Ad card generation
+### Added
+
+* Included the `html2canvas` CDN script in `frontend/views/gadget-detail.html` and wired up a placeholder button and container for advertisement card creation. The page now has a "Generate Ad Card" button and a hidden preview area ready to render an advertisement.
+* Implemented `frontend/public/js/cardGenerator.js` which powers the gadget detail page. The script fetches a single gadget by ID, renders its details (image, brand, model, type, status, cost price, specifications and description) on the page, constructs a branded advertisement card preview using the gadget’s information, and employs `html2canvas` to capture the card as a PNG that can be downloaded by the user.
+
+### Changed
+
+* Updated `gadget-detail.html` to reference the new `cardGenerator.js` script and to place a card preview container with the appropriate classes for styling.
+
