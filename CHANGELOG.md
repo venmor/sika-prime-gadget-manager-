@@ -52,3 +52,10 @@ All notable changes to this project will be documented in this file. The format 
 * Added `frontend/public/css/card.css` with styles for gadget cards and advertisement cards.
 * Linked the CSS files in each HTML page and added placeholders for JavaScript files to be implemented in later sections.
 
+## [Section 6] – Dynamic form handling
+### Added
+
+* Created `frontend/public/js/forms.js` to power the Add Gadget page. The script listens for changes on the type selector and dynamically generates appropriate specification fields (processor, RAM, storage, screen size, graphics for laptops; operating system, RAM, storage, screen size, camera, battery for phones).
+* Implemented form submission logic in `forms.js` which collects all form data (including uploaded images) via `FormData`, sends a POST request to `/api/gadgets`, handles the response, and redirects back to the inventory page on success.
+* Updated `add-gadget.html` to include the script (already linked in Section 5) which now provides dynamic behaviour.
+
