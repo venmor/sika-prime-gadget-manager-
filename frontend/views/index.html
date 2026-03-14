@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sika Prime Gadget Manager – Inventory</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/card.css">
+</head>
+<body>
+  <header>
+    <h1>Sika Prime Gadget Manager</h1>
+    <nav>
+      <a href="index.html">Inventory</a>
+      <a href="add-gadget.html">Add Gadget</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="filters">
+      <input type="text" id="search" placeholder="Search by name, brand, model">
+      <select id="filter-type">
+        <option value="">All Types</option>
+        <option value="laptop">Laptops</option>
+        <option value="phone">Phones</option>
+      </select>
+      <select id="filter-status">
+        <option value="">All Status</option>
+        <option value="available">Available</option>
+        <option value="sold">Sold</option>
+      </select>
+      <button id="filter-btn">Filter</button>
+    </section>
+    <section id="gadget-list" class="card-container">
+      <!-- Gadget cards will be injected here by JavaScript in Section 7 -->
+    </section>
+  </main>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -42,3 +42,13 @@ All notable changes to this project will be documented in this file. The format 
 * Added `backend/routes/salesRoutes.js` defining routes to create a sale and fetch sales reports.
 * Updated `backend/server.js` to import and mount the new gadget and sales routes under `/api/gadgets` and `/api/sales`.
 
+## [Section 5] – Frontend base HTML and CSS
+### Added
+
+* Created `frontend/views/index.html` providing the inventory list page with search and filter controls and a container for gadget cards.
+* Created `frontend/views/add-gadget.html` containing a form for adding gadgets (name, type, brand, model, cost price, description, image) and a dynamic specification container.
+* Created `frontend/views/gadget-detail.html` for showing a single gadget’s details and a placeholder for ad card generation.
+* Added `frontend/public/css/main.css` defining global styles for layout, typography, forms, and responsive card container.
+* Added `frontend/public/css/card.css` with styles for gadget cards and advertisement cards.
+* Linked the CSS files in each HTML page and added placeholders for JavaScript files to be implemented in later sections.
+

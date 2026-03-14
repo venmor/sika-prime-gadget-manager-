@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sika Prime Gadget Manager – Add Gadget</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/card.css">
+</head>
+<body>
+  <header>
+    <h1>Sika Prime Gadget Manager</h1>
+    <nav>
+      <a href="index.html">Inventory</a>
+      <a href="add-gadget.html">Add Gadget</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Add Gadget</h2>
+    <form id="gadget-form" enctype="multipart/form-data">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Type
+        <select name="type" id="type-selector" required>
+          <option value="">Select type</option>
+          <option value="laptop">Laptop</option>
+          <option value="phone">Phone</option>
+        </select>
+      </label>
+      <label>
+        Brand
+        <input type="text" name="brand">
+      </label>
+      <label>
+        Model
+        <input type="text" name="model">
+      </label>
+      <label>
+        Cost Price
+        <input type="number" name="cost_price" step="0.01" required>
+      </label>
+      <label>
+        Description
+        <textarea name="description" rows="4"></textarea>
+      </label>
+      <label>
+        Image
+        <input type="file" name="image" accept="image/*">
+      </label>
+      <div id="spec-container">
+        <!-- Dynamic specification fields will be inserted here by forms.js -->
+      </div>
+      <button type="submit">Save Gadget</button>
+    </form>
+  </main>
+
+  <script src="/js/forms.js"></script>
+</body>
+</html>
