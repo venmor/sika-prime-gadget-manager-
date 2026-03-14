@@ -128,3 +128,23 @@ form button:hover {
 #spec-container .spec-group {
   margin-bottom: 0.5rem;
 }
+
+/* Styles for tables (e.g., sales report) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+table th {
+  background-color: var(--primary-color);
+  color: #fff;
+}

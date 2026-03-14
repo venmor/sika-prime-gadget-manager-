@@ -77,3 +77,16 @@ All notable changes to this project will be documented in this file. The format 
 
 * Updated `gadget-detail.html` to reference the new `cardGenerator.js` script and to place a card preview container with the appropriate classes for styling.
 
+## [Section 9] – Profit tracking and sales
+### Added
+
+* Extended `frontend/views/gadget-detail.html` with a **Record Sale** section. This section contains a form where administrators can enter the selling price, buyer name, and sale date to mark a gadget as sold. Once submitted, the form hides and displays the calculated profit.
+* Enhanced `frontend/public/js/cardGenerator.js` to support recording sales. The script now listens for the sale form submission, sends the data to `/api/sales`, handles the response, updates the gadget status to `sold`, hides the form, and shows the profit earned from the sale. It also disables the sale form if the gadget is already sold.
+* Added a new **Sales Report** page (`frontend/views/sales-report.html`) and linked it in the navigation of all pages. The report displays a table of all recorded sales with columns for gadget name, buyer, selling price, profit and date sold.
+* Created `frontend/public/js/salesReport.js` to fetch sales data from the backend (`GET /api/sales`) and dynamically populate the sales report table. The script gracefully handles cases where no sales have been recorded.
+* Appended basic table styling to `frontend/public/css/main.css` to improve the readability of the sales report.
+
+### Changed
+
+* Updated navigation links in `index.html`, `add-gadget.html`, and `gadget-detail.html` to include a link to the new Sales Report page.
+

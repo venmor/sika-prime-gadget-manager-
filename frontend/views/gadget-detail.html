@@ -13,6 +13,7 @@
     <nav>
       <a href="index.html">Inventory</a>
       <a href="add-gadget.html">Add Gadget</a>
+      <a href="sales-report.html">Sales Report</a>
     </nav>
   </header>
 
@@ -26,6 +27,32 @@
       <div id="ad-card-preview" class="card card--ad" style="display: none;">
         <!-- Advertisement card preview will be inserted here in Section 8 -->
       </div>
+    </section>
+
+    <section id="sale-section">
+      <h2>Record Sale</h2>
+      <!--
+        Sale form collects the selling price, buyer name and date sold.
+        Upon submission it calls the backend to record the sale and
+        calculates profit. Once the sale is recorded the form is
+        hidden and the profit information is displayed instead.
+      -->
+      <form id="sale-form">
+        <div class="form-group">
+          <label for="buyer_name">Buyer Name</label>
+          <input type="text" id="buyer_name" name="buyer_name" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label for="selling_price">Selling Price (K)</label>
+          <input type="number" id="selling_price" name="selling_price" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label for="sale_date">Date Sold</label>
+          <input type="date" id="sale_date" name="sale_date" required>
+        </div>
+        <button type="submit">Mark as Sold</button>
+      </form>
+      <div id="sale-info" style="display: none;"></div>
     </section>
   </main>
 

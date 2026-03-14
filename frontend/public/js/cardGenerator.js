@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewCard = document.getElementById('ad-card-preview');
   const generateBtn = document.getElementById('generate-ad');
 
+  // Elements for sale functionality
+  const saleForm = document.getElementById('sale-form');
+  const saleInfo = document.getElementById('sale-info');
+
   // Parse the ID from the query string
   const params = new URLSearchParams(window.location.search);
   const gadgetId = params.get('id');
@@ -138,6 +142,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Build the advertisement card preview
     buildAdCard(gadget);
+
+    // If the gadget is already sold, hide the sale form and display a notice
+    if (gadget.status && gadget.status.toLowerCase() === 'sold') {
+      if (saleForm) saleForm.style.display = 'none';
+      if (saleInfo) {
+        saleInfo.style.display = 'block';
+        saleInfo.textContent = 'This gadget has already been sold.';
+      }
+    }
   }
 
   /**
@@ -217,4 +230,50 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 50);
   });
+
+  // Handle sale form submission
+  if (saleForm) {
+    saleForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      // Collect form values
+      const sellingPrice = saleForm.querySelector('[name="selling_price"]').value;
+      const buyerName = saleForm.querySelector('[name="buyer_name"]').value;
+      const saleDate = saleForm.querySelector('[name="sale_date"]').value;
+      if (!sellingPrice || !saleDate) {
+        alert('Please fill out required fields.');
+        return;
+      }
+      try {
+        const payload = {
+          gadgetId: parseInt(gadgetId, 10),
+          selling_price: parseFloat(sellingPrice),
+          sold_at: saleDate,
+          buyer_name: buyerName || null
+        };
+        const response = await fetch('/api/sales', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.error || 'Failed to record sale');
+        }
+        const data = await response.json();
+        // Hide form and show profit information
+        saleForm.style.display = 'none';
+        saleInfo.style.display = 'block';
+        const profit = data.profit != null ? parseFloat(data.profit).toFixed(2) : '0.00';
+        saleInfo.innerHTML = `<p>Sale recorded successfully!</p><p>Profit: K${profit}</p>`;
+        // Update status text to sold
+        const statusEl = detailSection.querySelector('p:nth-of-type(3)');
+        if (statusEl) statusEl.textContent = 'Status: sold';
+      } catch (err) {
+        console.error(err);
+        alert(err.message);
+      }
+    });
+  }
 });
