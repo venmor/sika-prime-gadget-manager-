@@ -24,3 +24,12 @@ All notable changes to this project will be documented in this file. The format 
 ### Changed
 
 * Updated `backend/package.json` with project metadata and dependency declarations.
+
+## [Section 3] – Database models
+### Added
+
+* Implemented `backend/models/Gadget.js` with functions to create, query, update and delete gadgets, including optional filtering and joining specification tables.
+* Added `backend/models/LaptopSpec.js` providing methods to insert and update laptop specifications.
+* Added `backend/models/PhoneSpec.js` providing methods to insert and update phone specifications.
+* Added `backend/models/Sale.js` with functionality to record a sale, compute profit by subtracting the gadget's cost price from the selling price, and update the gadget's status to `sold`.
+
