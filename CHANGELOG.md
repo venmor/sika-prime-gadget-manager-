@@ -33,3 +33,12 @@ All notable changes to this project will be documented in this file. The format 
 * Added `backend/models/PhoneSpec.js` providing methods to insert and update phone specifications.
 * Added `backend/models/Sale.js` with functionality to record a sale, compute profit by subtracting the gadget's cost price from the selling price, and update the gadget's status to `sold`.
 
+## [Section 4] – Controllers and API routes
+### Added
+
+* Implemented `backend/controllers/gadgetController.js` with handlers to list all gadgets, retrieve a gadget by ID, create a new gadget (including handling image uploads and inserting the appropriate specs), update an existing gadget (with upsert semantics for specs), and delete a gadget.
+* Implemented `backend/controllers/salesController.js` with handlers to record a sale (calculating profit and updating the gadget status) and optionally return a sales report with gadget details.
+* Added `backend/routes/gadgetRoutes.js` defining RESTful routes for gadgets (GET, POST, PUT, DELETE) and wiring up the upload middleware.
+* Added `backend/routes/salesRoutes.js` defining routes to create a sale and fetch sales reports.
+* Updated `backend/server.js` to import and mount the new gadget and sales routes under `/api/gadgets` and `/api/sales`.
+

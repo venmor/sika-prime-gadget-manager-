@@ -31,7 +31,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// TODO: Import and mount API routes (gadgets, sales) here in later sections
+// Import and mount API routes
+const gadgetRoutes = require('./routes/gadgetRoutes');
+const salesRoutes = require('./routes/salesRoutes');
+
+app.use('/api/gadgets', gadgetRoutes);
+app.use('/api/sales', salesRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
