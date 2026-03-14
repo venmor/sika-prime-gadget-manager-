@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function fetchGadget(id) {
     try {
-      const response = await fetch(`/api/gadgets/${id}`);
+      const response = await fetch(`/api/gadgets/${id}`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch gadget details');
       const gadget = await response.json();
       renderDetails(gadget);
@@ -255,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(payload)
         });
         if (!response.ok) {

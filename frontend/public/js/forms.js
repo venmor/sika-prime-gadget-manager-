@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function prefillForm(id) {
     try {
-      const response = await fetch(`/api/gadgets/${id}`);
+      const response = await fetch(`/api/gadgets/${id}`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch gadget');
       const gadget = await response.json();
       // Populate basic fields
@@ -115,7 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const method = editId ? 'PUT' : 'POST';
       const response = await fetch(url, {
         method,
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));

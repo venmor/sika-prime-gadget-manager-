@@ -11,6 +11,7 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const session = require('express-session');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -22,6 +23,21 @@ app.use(cors()); // enable CORS for all routes
 app.use(express.json()); // parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // parse URL‑encoded bodies
 
+// Session middleware – required for authentication
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'sika-prime-secret',
+    resave: false,
+    saveUninitialized: false,
+    // cookie settings can be customized; secure: true should be set when using HTTPS
+    cookie: {
+      // In production set secure: true and sameSite appropriately
+      secure: false,
+      httpOnly: true
+    }
+  })
+);
+
 // Serve static files from the frontend/public directory
 const publicPath = path.join(__dirname, '..', 'frontend', 'public');
 app.use(express.static(publicPath));
@@ -31,12 +47,19 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Import and mount API routes
+// Import routes and auth utilities
 const gadgetRoutes = require('./routes/gadgetRoutes');
 const salesRoutes = require('./routes/salesRoutes');
+const authController = require('./controllers/authController');
+const { ensureAuthenticated } = require('./middleware/auth');
 
-app.use('/api/gadgets', gadgetRoutes);
-app.use('/api/sales', salesRoutes);
+// Authentication endpoints
+app.post('/api/login', authController.login);
+app.post('/api/logout', authController.logout);
+
+// Protect API routes with authentication middleware
+app.use('/api/gadgets', ensureAuthenticated, gadgetRoutes);
+app.use('/api/sales', ensureAuthenticated, salesRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

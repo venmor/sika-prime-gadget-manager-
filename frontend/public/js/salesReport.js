@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function loadSales() {
     try {
-      const response = await fetch('/api/sales');
+      const response = await fetch('/api/sales', { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch sales');
       const data = await response.json();
       if (!data || data.length === 0) {

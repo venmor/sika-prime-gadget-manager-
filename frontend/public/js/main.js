@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (filterStatus.value) params.append('status', filterStatus.value);
       if (searchInput.value) params.append('search', searchInput.value.trim());
       const url = '/api/gadgets' + (params.toString() ? `?${params.toString()}` : '');
-      const response = await fetch(url);
+      const response = await fetch(url, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch gadgets');
       const data = await response.json();
       renderGadgets(data);
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       deleteBtn.addEventListener('click', async () => {
         if (confirm('Are you sure you want to delete this gadget?')) {
           try {
-            const resp = await fetch(`/api/gadgets/${gadget.id}`, { method: 'DELETE' });
+          const resp = await fetch(`/api/gadgets/${gadget.id}`, { method: 'DELETE', credentials: 'include' });
             if (!resp.ok) throw new Error('Delete failed');
             // Reload list after deletion
             fetchGadgets();

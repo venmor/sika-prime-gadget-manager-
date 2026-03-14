@@ -90,3 +90,20 @@ All notable changes to this project will be documented in this file. The format 
 
 * Updated navigation links in `index.html`, `add-gadget.html`, and `gadget-detail.html` to include a link to the new Sales Report page.
 
+## [Section 10] – Authentication and deployment docs
+### Added
+
+* Implemented session‑based authentication using `express-session` and `bcryptjs`. Added `backend/controllers/authController.js` to handle login and logout endpoints, and `backend/middleware/auth.js` to protect API routes by requiring a valid session.
+* Updated `backend/server.js` to configure session middleware, mount authentication routes (`/api/login`, `/api/logout`), and wrap gadget and sales routes with authentication middleware. Added new dependencies (`express-session`, `bcryptjs`) to `backend/package.json`.
+* Added `backend/.env.example` variables for `SESSION_SECRET`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD_HASH`, with comments on generating a bcrypt hash for the admin password.
+* Created a login page (`frontend/views/login.html`) with a simple form. Added `frontend/public/js/login.js` to handle credential submission, send a POST request to the login endpoint and redirect on success.
+* Added a reusable logout handler in `frontend/public/js/auth.js` and linked it across all pages. Each navigation bar now includes a “Logout” link that destroys the session and redirects to the login page.
+* Created a deployment guide (`deploy.md`) detailing how to configure environment variables, run migrations, and deploy the application to Heroku or a VPS with MySQL. The guide includes instructions for generating a password hash, setting up a `Procfile` for Heroku, and a sample nginx configuration for self‑hosting.
+
+### Changed
+
+* Added navigation links for “Logout” across all main views and included a script (`auth.js`) to handle session termination.
+* Adjusted all frontend fetch requests (`main.js`, `forms.js`, `cardGenerator.js`, `salesReport.js`) to include `credentials: 'include'` so that session cookies are transmitted with API requests.
+* Modified `backend/package.json` to include new dependencies (`express-session`, `bcryptjs`).
+* Updated `.env.example` to include session and admin credential variables.
+
