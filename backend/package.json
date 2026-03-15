@@ -4,6 +4,8 @@
   "main": "server.js",
   "scripts": {
     "db:check": "node scripts/check-db.js",
+    "migrate": "node scripts/run-migrations.js",
+    "seed:demo": "node scripts/seed-demo-data.js",
     "test": "node --test tests/*.test.js",
     "start": "node server.js"
   },

@@ -3,6 +3,7 @@ backend/node_modules/
 
 # Ignore environment files
 backend/.env
+team-test.env
 
 # Ignore runtime session files
 backend/.sessions/

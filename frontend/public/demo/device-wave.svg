@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Demo device illustration</title>
+  <desc id="desc">A blue and pink tech-device illustration for seeded gadget cards.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#eef8ff" />
+      <stop offset="100%" stop-color="#ffe8f6" />
+    </linearGradient>
+    <linearGradient id="body" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#74c6ff" />
+      <stop offset="100%" stop-color="#ff86be" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" fill="url(#bg)" rx="48" />
+  <circle cx="194" cy="155" r="120" fill="#d7f0ff" opacity=".65" />
+  <circle cx="780" cy="565" r="150" fill="#ffd2e3" opacity=".5" />
+  <rect x="228" y="176" width="504" height="344" rx="48" fill="url(#body)" />
+  <rect x="278" y="226" width="404" height="244" rx="32" fill="#f6fbff" opacity=".9" />
+  <circle cx="390" cy="348" r="58" fill="#7dcfff" />
+  <path d="M506 287h98c34 0 62 28 62 62s-28 62-62 62h-98c-34 0-62-28-62-62s28-62 62-62Z" fill="#ff97bf" />
+  <rect x="350" y="546" width="260" height="28" rx="14" fill="#b8cde2" />
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Demo laptop illustration</title>
+  <desc id="desc">A soft blue and pink laptop illustration for seeded gadget cards.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8f4ff" />
+      <stop offset="100%" stop-color="#fde7f4" />
+    </linearGradient>
+    <linearGradient id="screen" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#6cb8ff" />
+      <stop offset="100%" stop-color="#ff86b8" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" fill="url(#bg)" rx="48" />
+  <circle cx="755" cy="150" r="110" fill="#bfe3ff" opacity=".55" />
+  <circle cx="195" cy="560" r="145" fill="#ffc1d9" opacity=".42" />
+  <rect x="228" y="138" width="504" height="328" rx="28" fill="#204777" opacity=".15" />
+  <rect x="212" y="122" width="504" height="328" rx="28" fill="#17385d" />
+  <rect x="235" y="145" width="458" height="282" rx="18" fill="url(#screen)" />
+  <rect x="180" y="470" width="568" height="52" rx="18" fill="#b4c7dd" />
+  <path d="M142 522h676c-12 43-42 64-92 64H234c-50 0-80-21-92-64Z" fill="#d9e2ef" />
+  <rect x="414" y="544" width="132" height="12" rx="6" fill="#8c9aad" />
+</svg>

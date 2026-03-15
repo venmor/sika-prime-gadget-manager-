@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="title desc">
+  <title id="title">Demo phone illustration</title>
+  <desc id="desc">A coral and blue smartphone illustration for seeded gadget cards.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#f6fbff" />
+      <stop offset="100%" stop-color="#ffe5ef" />
+    </linearGradient>
+    <linearGradient id="screen" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#7bd0ff" />
+      <stop offset="100%" stop-color="#ff8ea6" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="720" fill="url(#bg)" rx="48" />
+  <circle cx="250" cy="160" r="110" fill="#b8ebff" opacity=".55" />
+  <circle cx="755" cy="570" r="145" fill="#ffc1d4" opacity=".45" />
+  <rect x="330" y="92" width="300" height="536" rx="44" fill="#15395f" />
+  <rect x="350" y="132" width="260" height="456" rx="30" fill="url(#screen)" />
+  <rect x="420" y="108" width="120" height="12" rx="6" fill="#d7e3ef" opacity=".8" />
+  <circle cx="480" cy="560" r="14" fill="#ffffff" opacity=".65" />
+  <path d="M396 218c54-36 114-36 168 0 18 12 36 28 42 53-12 14-27 24-44 32-46 21-74 61-74 113v28h-16v-28c0-52-28-92-74-113-17-8-32-18-44-32 6-25 24-41 42-53Z" fill="#ffffff" opacity=".24" />
+</svg>

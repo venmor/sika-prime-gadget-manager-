@@ -1,171 +1,331 @@
-# Sika Prime Gadget Manager
+# Sika Prime Gadget Manager
 
-This project is a simple inventory management system for a gadget shop. It allows you to keep track of laptops and phones, store their specifications, upload product images, mark items as sold and calculate profits. A small client side module also generates branded advertisement cards that can be downloaded as PNG files.
+This project includes a guided local test setup so teammates can clone the repository, run one helper script, and start testing the app with demo data.
 
-## Table of contents
+The local test flow is designed to:
 
-1. [Prerequisites](#prerequisites)
-2. [Project structure](#project-structure)
-3. [Database setup](#database-setup)
-4. [Installation](#installation)
-5. [Local setup checklist](#local-setup-checklist)
-6. [Running the application](#running-the-application)
-7. [Environment variables](#environment-variables)
-8. [Deployment](#deployment)
+- create `team-test.env` automatically if it is missing
+- check Git, Docker, and Docker Compose before starting
+- reuse the same local setup later so teammates can continue from where they stopped
+- give Linux and Windows users the same guided menu
 
-## Prerequisites
+## What teammates need before they start
 
-* **Node.js** (v18+ recommended) – used to run the backend server.
-* **MySQL** (v8+) – database for storing gadget and sales data.
-* **Git** – version control tool used throughout this project.
+Install these two apps first:
 
-Make sure these are installed on your system before proceeding.
+- Git: https://git-scm.com/downloads
+- Docker Desktop: https://www.docker.com/products/docker-desktop/
 
-## Project structure
+After Docker Desktop installs, open it and wait until it says Docker is running.
 
-The repository is organised as follows:
+## Step 1. Clone the repository
 
-```text
-sika-prime-gadget-manager/
-├── backend/             # Express server and API logic
-│   ├── config/          # Database configuration
-│   ├── controllers/     # Route handlers
-│   ├── models/          # Data access logic for each table
-│   ├── routes/          # Express routers
-│   ├── middleware/      # Custom Express middleware (e.g. file upload)
-│   └── utils/           # Helper functions (if needed)
-├── frontend/            # Static assets and HTML views
-│   ├── public/          # Public assets served by Express
-│   │   ├── css/         # Stylesheets
-│   │   ├── js/          # JavaScript files
-│   │   └── images/      # Placeholder for uploaded images and logos
-│   └── views/           # HTML templates/pages
-├── database/            # Database scripts
-│   ├── migrations/      # SQL scripts to create tables
-│   └── seeds/           # (Optional) Seed data
-├── docs/                # Project documentation
-├── scripts/             # Utility scripts (if needed)
-└── CHANGELOG.md         # Summary of changes per section
+Use the project SSH repository URL:
+
+```bash
+git clone git@github.com:venmor/sika-prime-gadget-manager-.git
+cd sika-prime-gadget-manager-
 ```
 
-## Database setup
+Example:
 
-1. Create a MySQL database, e.g. `sikaprime`.
-2. Execute the SQL script found in `database/migrations/create_tables.sql` to create the required tables. You can do this using the MySQL command line client:
+```bash
+$ git clone git@github.com:venmor/sika-prime-gadget-manager-.git
+Cloning into 'sika-prime-gadget-manager-'...
+$ cd sika-prime-gadget-manager-
+```
 
-   ```bash
-   mysql -u <your_user> -p sikaprime < database/migrations/create_tables.sql
-   ```
+If you get an SSH error like `Permission denied (publickey)`, ask the repository owner to add your GitHub SSH key before trying again.
 
-   Replace `<your_user>` with your MySQL username. You will be prompted for your password.
-3. If your database already existed before the `list_price` field was introduced, also run:
+## Step 2. Start the guided setup helper
 
-   ```bash
-   mysql -u <your_user> -p sikaprime < database/migrations/20260314_add_list_price.sql
-   ```
+The helper opens an interactive menu. It can set up local config, start the app, show logs, stop the app, or reset local test data.
 
-## Installation
+### Linux
 
-1. Clone the repository:
+Run:
 
-   ```bash
-   git clone <repo-url> sika-prime-gadget-manager
-   cd sika-prime-gadget-manager
-   ```
+```bash
+bash ./scripts/team-test.sh
+```
 
-2. Install backend dependencies:
+### Windows PowerShell
 
-   ```bash
-   cd backend
-   npm install
-   ```
+Run:
 
-3. Install frontend dependencies (currently none; all front‑end code is vanilla HTML/CSS/JS).
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1
+```
 
-## Local setup checklist
+### Windows batch file
 
-Use this sequence for a clean local setup:
+If someone prefers double-clicking or `cmd`, use:
 
-1. Confirm MySQL is installed and running on your machine.
-2. Create the `sikaprime` database.
-3. Run `database/migrations/create_tables.sql`.
-4. If you already had an older local database, run `database/migrations/20260314_add_list_price.sql`.
-5. Copy `backend/.env.example` to `backend/.env`.
-6. Fill in the database and admin credentials in `backend/.env`.
-7. Run `cd backend && npm install`.
-8. Run `cd backend && npm run db:check`.
-9. Start the app with `cd backend && npm start`.
+```bat
+.\scripts\team-test.bat
+```
 
-## Running the application
+## Step 3. Use the interactive menu
 
-1. Copy the provided `.env.example` file to `.env` in the `backend` folder and fill in your database connection details, auth settings, and desired port:
+When the helper opens, it shows options like these:
 
-   ```env
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASS=yourpassword
-   DB_NAME=sikaprime
-   DB_CONNECTION_LIMIT=10
-   PORT=3000
-   SESSION_SECRET=replace-with-a-long-random-string
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD_HASH=replace-with-a-bcrypt-hash
-   ```
+```text
+Sika Prime Gadget Manager - Team Test Helper
 
-   Generate the password hash with:
+Choose an option
+  1. Setup or update local settings
+  2. Start or resume the app
+  3. Check setup
+  4. Show status
+  5. Show logs
+  6. Stop the app
+  7. Reset local test data
+  8. Exit
+```
 
-   ```bash
-   cd backend
-   node -e "require('bcryptjs').hash('your-password', 10).then(console.log)"
-   ```
+Recommended first-time path:
 
-   Generate a session secret with:
+1. choose `1` to review the local port and admin username
+2. choose `2` to start the app
 
-   ```bash
-   cd backend
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   ```
+What the helper does for you:
 
-2. Start the server:
+- runs environment checks
+- creates `team-test.env` if it does not exist yet
+- keeps your last local settings instead of overwriting them
+- starts Docker containers with the test database and seeded demo data
 
-   ```bash
-   cd backend
-   npm run db:check
-   npm start
-   ```
+## Step 4. Open the app
 
-3. Open your browser to `http://localhost:3000/login.html` to access the web interface.
-4. Optional health checks:
+After startup, open:
 
-   ```bash
-   curl http://localhost:3000/api/health
-   curl http://localhost:3000/api/health/db
-   ```
+```text
+http://localhost:3000/login.html
+```
 
-## Environment variables
+If you changed the port during setup, use that port instead.
 
-The application expects the following environment variables in a `.env` file within the `backend` directory:
+Example:
 
-* **DB_HOST** – MySQL host (e.g. `localhost`).
-* **DB_PORT** – MySQL port (default: `3306`).
-* **DB_USER** – MySQL user.
-* **DB_PASS** – MySQL password.
-* **DB_NAME** – MySQL database name.
-* **DB_CONNECTION_LIMIT** – Maximum MySQL pool size (default: `10`).
-* **PORT** – Port for the Express server (default: 3000).
-* **SESSION_SECRET** – Secret used to sign session cookies.
-* **ADMIN_USERNAME** – Username accepted by the login form.
-* **ADMIN_PASSWORD_HASH** – bcrypt hash for the admin password.
+```text
+http://localhost:3001/login.html
+```
 
-These variables are loaded using `dotenv` and used to configure the database connection and server port.
+## Step 5. Sign in with the shared test login
 
-If `npm run db:check` fails, fix the `.env` values first before starting the server.
-`SESSION_SECRET` is required; the server will not start without it.
+Default login:
 
-## Deployment
+- Username: `admin`
+- Password: `TeamTest123!`
 
-For deployment guides:
+Extra seeded demo users:
 
-- VPS + PM2 + nginx: [`deploy.md`](/home/charlie/sika-prime-gadget-manager/deploy.md)
-- GitHub-connected Railway preview deployment: [`deploy/railway.md`](/home/charlie/sika-prime-gadget-manager/deploy/railway.md)
+- `mercy.soko` - admin
+- `martha.phiri` - staff
+- `patrick.moyo` - staff
+
+All seeded accounts use the same password:
+
+- `TeamTest123!`
+
+## Step 6. What everyone will see after login
+
+The first local startup seeds demo data automatically, so teammates begin with the same sample workspace.
+
+That includes:
+
+- available gadgets in Inventory
+- sold gadgets in Sales
+- extra users in the Users page
+- a deleted gadget example in deleted history
+- demo images for inventory cards and previews
+
+Important note:
+
+- each teammate still uses their own local Docker data
+- the seeded demo data is the same on first setup
+- later edits stay on that teammate's machine unless they reset the environment
+
+## Continue from where you stopped
+
+The helper is resume-friendly by default.
+
+What that means:
+
+- `team-test.env` is reused if it already exists
+- Docker volumes are reused unless you run a reset
+- running `Start or resume the app` brings back the same local data you had before
+
+Example on Linux:
+
+```bash
+bash ./scripts/team-test.sh start
+```
+
+Example on Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 resume
+```
+
+## Direct command examples
+
+Teammates can use the menu, but these direct commands also work.
+
+### Check setup
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh doctor
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 doctor
+```
+
+### Start or resume the app
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh start
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 start
+```
+
+### Show running containers
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh status
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 status
+```
+
+### Show live logs
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh logs
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 logs
+```
+
+### Stop the app without removing data
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh stop
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 stop
+```
+
+### Reset all local test data
+
+This removes the local Docker data for this project and gives the teammate a fresh seeded setup next time they start again.
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh reset --yes
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\team-test.ps1 reset -Yes
+```
+
+## Common setup examples
+
+### Example: change the local port
+
+If port `3000` is already in use:
+
+1. run the helper
+2. choose `Setup or update local settings`
+3. change the port to something like `3001`
+4. start the app again
+
+Then open:
+
+```text
+http://localhost:3001/login.html
+```
+
+### Example: Docker is not running
+
+If the helper says Docker is installed but not running:
+
+1. open Docker Desktop
+2. wait until Docker says it is running
+3. run the helper again
+4. choose `Start or resume the app`
+
+### Example: someone stopped yesterday and wants to continue today
+
+They do not need to clone again or reconfigure everything.
+
+They only need:
+
+Linux:
+
+```bash
+bash ./scripts/team-test.sh
+```
+
+Then choose:
+
+```text
+2. Start or resume the app
+```
+
+Or directly:
+
+```bash
+bash ./scripts/team-test.sh resume
+```
+
+## Notes for the team
+
+- This local setup does not need a paid domain.
+- The app, database, and demo data run locally in Docker.
+- Uploaded files and local test changes stay on the teammate's machine until they reset.
+- The helper scripts are the recommended way to run the app for team testing.
+
+## Helpful files
+
+- Team helper for Linux: [team-test.sh](/home/charlie/sika-prime-gadget-manager/scripts/team-test.sh)
+- Team helper for Windows PowerShell: [team-test.ps1](/home/charlie/sika-prime-gadget-manager/scripts/team-test.ps1)
+- Windows batch wrapper: [team-test.bat](/home/charlie/sika-prime-gadget-manager/scripts/team-test.bat)
+- Local test settings example: [team-test.env.example](/home/charlie/sika-prime-gadget-manager/team-test.env.example)
+- Detailed team testing reference: [TEAM_TESTING.md](/home/charlie/sika-prime-gadget-manager/TEAM_TESTING.md)
+
+## Technical deployment docs
+
+If the team later wants a shared online preview or production deployment:
+
+- VPS deployment: [deploy.md](/home/charlie/sika-prime-gadget-manager/deploy.md)
+- Railway deployment: [railway.md](/home/charlie/sika-prime-gadget-manager/deploy/railway.md)
