@@ -7,6 +7,7 @@ RUN cd backend && npm ci --omit=dev
 
 COPY backend ./backend
 COPY frontend ./frontend
+COPY database ./database
 
 ENV NODE_ENV=production
 
