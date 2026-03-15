@@ -3,64 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sika Prime Gadget Manager – Gadget Detail</title>
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/card.css">
+  <title>Sika Prime Gadget Manager - Gadget Detail</title>
+  <link rel="stylesheet" href="/css/gadget-detail.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
   <header>
-    <h1>Sika Prime Gadget Manager</h1>
+    <div class="header-brand">
+      <span class="header-brand__mark">
+        <img src="/images/sika-prime-loans-logo.svg" alt="" class="header-brand__logo">
+      </span>
+      <div class="header-brand__copy">
+        <span class="header-brand__eyebrow">Sika Prime Loans</span>
+        <h1>Gadget Manager</h1>
+      </div>
+    </div>
     <nav>
-      <a href="index.html">Inventory</a>
-      <a href="add-gadget.html">Add Gadget</a>
-      <a href="sales-report.html">Sales Report</a>
+      <a href="/index.html">Inventory</a>
+      <a href="/add-gadget.html">Add Gadget</a>
+      <a href="/sales-report.html">Sales</a>
+      <a href="/users.html">Users</a>
       <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
 
-  <main>
-    <section id="gadget-details">
-      <!-- Gadget details will be populated by JavaScript in Section 8 -->
-    </section>
-
-    <section id="ad-card-section">
-      <button id="generate-ad">Generate Ad Card</button>
-      <div id="ad-card-preview" class="card card--ad" style="display: none;">
-        <!-- Advertisement card preview will be inserted here in Section 8 -->
+  <main class="page-shell detail-page">
+    <section class="page-hero detail-page__hero">
+      <div>
+        <span class="page-hero__eyebrow">Details</span>
+        <h2>View, post, or sell this gadget.</h2>
+        <p>Everything for this item is on one screen.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-highlight">
+          <strong>Poster + sale</strong>
+          <span>Download a poster or save the sale.</span>
+        </div>
       </div>
     </section>
 
-    <section id="sale-section">
-      <h2>Record Sale</h2>
-      <!--
-        Sale form collects the selling price, buyer name and date sold.
-        Upon submission it calls the backend to record the sale and
-        calculates profit. Once the sale is recorded the form is
-        hidden and the profit information is displayed instead.
-      -->
-      <form id="sale-form">
-        <div class="form-group">
-          <label for="buyer_name">Buyer Name</label>
-          <input type="text" id="buyer_name" name="buyer_name" placeholder="Optional">
+    <p id="detail-message" class="page-message" hidden></p>
+
+    <div class="content-grid detail-layout">
+      <section id="gadget-details" class="panel-card detail-layout__main">
+        <!-- Gadget details will be populated by JavaScript -->
+      </section>
+
+      <aside class="content-grid detail-layout__rail">
+        <section id="ad-card-section" class="panel-card detail-tool detail-tool--ad">
+          <div class="section-header">
+            <div>
+              <h3>Ad Card Studio</h3>
+              <p>Shape a product-first clay ad with branding, sharp specs, clean pricing, and one custom line.</p>
+            </div>
+          </div>
+          <label for="ad-extra-text" class="detail-tool__field">
+            Ad Extra Text
+            <textarea id="ad-extra-text" placeholder="Add a short promo line, payment note, or call-to-action for the ad card."></textarea>
+          </label>
+          <button id="generate-ad" class="detail-tool__action">Export Ad PNG</button>
+        </section>
+
+        <section id="sale-section" class="panel-card detail-tool detail-tool--sale">
+          <div class="section-header">
+            <div>
+              <h3>Record Sale</h3>
+              <p>Save the sale and update stock.</p>
+            </div>
+          </div>
+          <form id="sale-form" class="stack">
+            <label for="buyer_name">
+              Buyer
+              <input type="text" id="buyer_name" name="buyer_name" placeholder="Optional">
+            </label>
+            <label for="selling_price">
+              Sale Price (K)
+              <input type="number" id="selling_price" name="selling_price" step="0.01" required>
+            </label>
+            <label for="sale_date">
+              Sold On
+              <input type="date" id="sale_date" name="sale_date" required>
+            </label>
+            <button type="submit">Save Sale</button>
+          </form>
+          <div id="sale-info" class="page-message page-message--success" style="display: none; margin-top: 1rem;"></div>
+        </section>
+      </aside>
+    </div>
+
+    <details id="ad-preview-section" class="panel-card detail-preview-panel">
+      <summary class="detail-preview-toggle">
+        <div>
+          <strong>View Live Ad Preview</strong>
+          <span>Open the full preview when you want to inspect the current creative.</span>
         </div>
-        <div class="form-group">
-          <label for="selling_price">Selling Price (K)</label>
-          <input type="number" id="selling_price" name="selling_price" step="0.01" required>
+        <span class="detail-preview-badge">4:5 Portrait</span>
+      </summary>
+      <div class="detail-preview-panel__body">
+        <div class="section-header detail-preview-panel__header">
+          <div>
+            <h3>Live Ad Preview</h3>
+            <p>Preview the current ad at a larger showcase size before exporting the final design.</p>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="sale_date">Date Sold</label>
-          <input type="date" id="sale_date" name="sale_date" required>
+        <div class="detail-preview-shell">
+          <div id="ad-card-preview" class="card card--ad">
+          <!-- Advertisement card preview will be inserted here by JavaScript -->
+          </div>
         </div>
-        <button type="submit">Mark as Sold</button>
-      </form>
-      <div id="sale-info" style="display: none;"></div>
-    </section>
+      </div>
+    </details>
   </main>
 
-  <!-- JavaScript for generating ad cards and handling detail page will be included in later sections -->
-  <!-- html2canvas CDN for capturing cards as images -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="/js/cardGenerator.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/adCard.js"></script>
+  <script src="/js/cardGenerator.js"></script>
 </body>
 </html>

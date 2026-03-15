@@ -4,6 +4,9 @@ backend/node_modules/
 # Ignore environment files
 backend/.env
 
+# Ignore runtime session files
+backend/.sessions/
+
 # Ignore uploaded files
 frontend/public/uploads/
 

@@ -1,26 +1,63 @@
 /*
- * Script for handling logout across the application.
+ * Shared authentication helpers for protected pages.
  *
- * Attaches a click handler to an element with ID `logout-link`. When
- * triggered the script sends a POST request to /api/logout, clears
- * the session on the server and redirects the user back to the login
- * page. All fetch requests include credentials to ensure the session
- * cookie is transmitted.
+ * Provides a small fetch wrapper that redirects to the login page on
+ * unauthorized responses and wires up the logout link when present.
  */
+
+function redirectToLogin() {
+  window.location.href = '/login.html';
+}
+
+let currentUserPromise = null;
+
+async function fetchWithAuth(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: 'include',
+    ...options
+  });
+
+  if (response.status === 401) {
+    redirectToLogin();
+    throw new Error('Unauthorized');
+  }
+
+  return response;
+}
+
+async function getCurrentUser({ force = false } = {}) {
+  if (!currentUserPromise || force) {
+    currentUserPromise = (async () => {
+      const response = await fetchWithAuth('/api/session');
+      if (!response.ok) {
+        throw new Error('Failed to fetch current session');
+      }
+
+      const data = await response.json();
+      return data.user;
+    })();
+  }
+
+  return currentUserPromise;
+}
+
+window.appAuth = {
+  fetchWithAuth,
+  getCurrentUser,
+  redirectToLogin
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   const logoutLink = document.getElementById('logout-link');
   if (!logoutLink) return;
+
   logoutLink.addEventListener('click', async (event) => {
     event.preventDefault();
     try {
-      await fetch('/api/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      await fetchWithAuth('/api/logout', { method: 'POST' });
     } catch (err) {
       console.error(err);
     }
-    window.location.href = 'login.html';
+    redirectToLogin();
   });
 });

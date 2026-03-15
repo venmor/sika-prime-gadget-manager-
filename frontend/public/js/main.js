@@ -7,11 +7,58 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const { fetchWithAuth } = window.appAuth;
   const listContainer = document.getElementById('gadget-list');
+  const messageEl = document.getElementById('inventory-message');
+  const statTotal = document.getElementById('stat-total');
+  const statAvailable = document.getElementById('stat-available');
+  const statSold = document.getElementById('stat-sold');
+  const statPriced = document.getElementById('stat-priced');
+  const heroTotalCount = document.getElementById('hero-total-count');
+  const heroAvailableCount = document.getElementById('hero-available-count');
+  const heroSoldCount = document.getElementById('hero-sold-count');
   const searchInput = document.getElementById('search');
   const filterType = document.getElementById('filter-type');
   const filterStatus = document.getElementById('filter-status');
   const filterBtn = document.getElementById('filter-btn');
+
+  function formatLabel(value) {
+    return String(value || '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+  }
+
+  function formatCurrency(value, fallback = 'No price') {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? `K${parsed.toFixed(2)}` : fallback;
+  }
+
+  function showMessage(message, variant = 'info') {
+    messageEl.textContent = message;
+    messageEl.className = `page-message page-message--${variant}`;
+    messageEl.hidden = false;
+  }
+
+  function clearMessage() {
+    messageEl.hidden = true;
+    messageEl.textContent = '';
+    messageEl.className = 'page-message';
+  }
+
+  function updateStats(gadgets) {
+    const total = gadgets.length;
+    const available = gadgets.filter((gadget) => gadget.status === 'available').length;
+    const sold = gadgets.filter((gadget) => gadget.status === 'sold').length;
+    const priced = gadgets.filter((gadget) => gadget.list_price != null).length;
+
+    statTotal.textContent = String(total);
+    statAvailable.textContent = String(available);
+    statSold.textContent = String(sold);
+    statPriced.textContent = String(priced);
+    heroTotalCount.textContent = `${total} items`;
+    heroAvailableCount.textContent = `${available} available`;
+    heroSoldCount.textContent = `${sold} sold`;
+  }
 
   // Load gadgets when the page loads
   fetchGadgets();
@@ -26,18 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function fetchGadgets() {
     try {
+      clearMessage();
       const params = new URLSearchParams();
       if (filterType.value) params.append('type', filterType.value);
       if (filterStatus.value) params.append('status', filterStatus.value);
       if (searchInput.value) params.append('search', searchInput.value.trim());
       const url = '/api/gadgets' + (params.toString() ? `?${params.toString()}` : '');
-      const response = await fetch(url, { credentials: 'include' });
+      const response = await fetchWithAuth(url);
       if (!response.ok) throw new Error('Failed to fetch gadgets');
       const data = await response.json();
+      updateStats(data);
       renderGadgets(data);
     } catch (err) {
+      if (err.message === 'Unauthorized') return;
       console.error(err);
-      alert('Unable to fetch gadgets');
+      showMessage('Unable to load gadgets right now.', 'error');
     }
   }
 
@@ -48,68 +98,123 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function renderGadgets(gadgets) {
     listContainer.innerHTML = '';
+    listContainer.classList.remove('card-container--empty');
+
     if (!gadgets || gadgets.length === 0) {
-      const msg = document.createElement('p');
-      msg.textContent = 'No gadgets found.';
-      listContainer.appendChild(msg);
+      listContainer.classList.add('card-container--empty');
+      const emptyState = document.createElement('div');
+      emptyState.className = 'empty-state';
+      emptyState.innerHTML = `
+        <strong>No matching gadgets</strong>
+        <span>Try new filters or add one.</span>
+      `;
+      listContainer.appendChild(emptyState);
       return;
     }
-    gadgets.forEach(gadget => {
-      const card = document.createElement('div');
-      card.className = 'card';
 
-      // Image or placeholder
+    gadgets.forEach(gadget => {
+      const card = document.createElement('article');
+      card.className = `card ${gadget.status === 'sold' ? 'card--sold' : 'card--available'}`;
+
+      const media = document.createElement('div');
+      media.className = 'card__media';
+      const typeBadge = document.createElement('span');
+      typeBadge.className = 'card__type-badge';
+      typeBadge.textContent = formatLabel(gadget.type);
+      media.appendChild(typeBadge);
+
       if (gadget.image_path) {
         const img = document.createElement('img');
         img.src = gadget.image_path;
         img.alt = gadget.name;
-        card.appendChild(img);
+        media.appendChild(img);
       } else {
         const placeholder = document.createElement('div');
         placeholder.className = 'no-image';
-        placeholder.textContent = 'No image';
-        card.appendChild(placeholder);
+        placeholder.textContent = 'No photo';
+        media.appendChild(placeholder);
       }
+      card.appendChild(media);
+
+      const content = document.createElement('div');
+      content.className = 'card__content';
+
+      const eyebrow = document.createElement('div');
+      eyebrow.className = 'card__eyebrow';
+      const status = document.createElement('span');
+      status.className = `status-pill ${gadget.status === 'sold' ? 'status-pill--sold' : 'status-pill--available'}`;
+      status.textContent = formatLabel(gadget.status);
+      eyebrow.appendChild(status);
+
+      const priceBadge = document.createElement('span');
+      priceBadge.className = 'card__price';
+      const hasListPrice = Number.isFinite(Number.parseFloat(gadget.list_price));
+      priceBadge.textContent = formatCurrency(gadget.list_price, 'On request');
+      if (!hasListPrice) {
+        priceBadge.classList.add('card__price--muted');
+      }
+      eyebrow.appendChild(priceBadge);
+      content.appendChild(eyebrow);
 
       const nameEl = document.createElement('h3');
+      nameEl.className = 'card__title';
       nameEl.textContent = gadget.name;
-      card.appendChild(nameEl);
+      content.appendChild(nameEl);
 
       const brandModel = document.createElement('p');
+      brandModel.className = 'card__subtitle';
       const brand = gadget.brand || '';
       const model = gadget.model || '';
-      brandModel.textContent = [brand, model].filter(Boolean).join(' ');
-      card.appendChild(brandModel);
+      brandModel.textContent = [brand, model].filter(Boolean).join(' ') || 'Brand or model missing';
+      content.appendChild(brandModel);
 
-      const statusEl = document.createElement('p');
-      statusEl.textContent = `Status: ${gadget.status}`;
-      card.appendChild(statusEl);
+      const meta = document.createElement('div');
+      meta.className = 'card__meta';
+      const typeRow = document.createElement('div');
+      typeRow.className = 'card__meta-row';
+      typeRow.innerHTML = `<span>Type</span><strong>${formatLabel(gadget.type)}</strong>`;
+      meta.appendChild(typeRow);
+      const costRow = document.createElement('div');
+      costRow.className = 'card__meta-row';
+      costRow.innerHTML = `<span>Recovery</span><strong>${formatCurrency(gadget.cost_price, 'Not set')}</strong>`;
+      meta.appendChild(costRow);
+      content.appendChild(meta);
+      card.appendChild(content);
 
       // Actions
       const actions = document.createElement('div');
-      actions.className = 'actions';
+      actions.className = 'card__actions';
+      const viewBtn = document.createElement('button');
+      viewBtn.className = 'card__action card__action--primary';
+      viewBtn.textContent = 'Open';
+      viewBtn.addEventListener('click', () => {
+        window.location.href = `/gadget-detail.html?id=${gadget.id}`;
+      });
       const editBtn = document.createElement('button');
       editBtn.textContent = 'Edit';
-      editBtn.className = 'edit';
+      editBtn.className = 'card__action card__action--secondary';
       editBtn.addEventListener('click', () => {
-        window.location.href = `add-gadget.html?id=${gadget.id}`;
+        window.location.href = `/add-gadget.html?id=${gadget.id}`;
       });
       const deleteBtn = document.createElement('button');
       deleteBtn.textContent = 'Delete';
-      deleteBtn.className = 'delete';
+      deleteBtn.className = 'card__action card__action--danger';
       deleteBtn.addEventListener('click', async () => {
-        if (confirm('Are you sure you want to delete this gadget?')) {
+        if (confirm('Delete this gadget?')) {
           try {
-          const resp = await fetch(`/api/gadgets/${gadget.id}`, { method: 'DELETE', credentials: 'include' });
+            const resp = await fetchWithAuth(`/api/gadgets/${gadget.id}`, { method: 'DELETE' });
             if (!resp.ok) throw new Error('Delete failed');
             // Reload list after deletion
+            showMessage('Gadget deleted.', 'success');
             fetchGadgets();
           } catch (err) {
+            if (err.message === 'Unauthorized') return;
             console.error(err);
-            alert('Failed to delete gadget');
+            showMessage('Could not delete gadget.', 'error');
           }
         }
       });
+      actions.appendChild(viewBtn);
       actions.appendChild(editBtn);
       actions.appendChild(deleteBtn);
       card.appendChild(actions);

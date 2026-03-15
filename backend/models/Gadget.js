@@ -6,7 +6,11 @@
  * `config/db.js` so connections are automatically managed.
  */
 
-const pool = require('../config/db');
+const { pool } = require('../config/db');
+
+function getExecutor(executor) {
+  return executor || pool;
+}
 
 /**
  * Insert a new gadget into the database.
@@ -15,20 +19,22 @@ const pool = require('../config/db');
  * @param {string} imagePath - Relative path to the uploaded image.
  * @returns {Promise<number>} The ID of the newly inserted gadget.
  */
-async function create(gadgetData, imagePath) {
+async function create(gadgetData, imagePath, executor) {
   const {
     name,
     type,
     brand = null,
     model = null,
     cost_price,
+    list_price = null,
     status = 'available',
-    description = null
+    description = null,
+    other_specs = null
   } = gadgetData;
 
-  const sql = `INSERT INTO gadgets (name, type, brand, model, cost_price, status, image_path, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-  const values = [name, type, brand, model, cost_price, status, imagePath, description];
-  const [result] = await pool.query(sql, values);
+  const sql = `INSERT INTO gadgets (name, type, brand, model, cost_price, list_price, status, image_path, description, other_specs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const values = [name, type, brand, model, cost_price, list_price, status, imagePath, description, other_specs];
+  const [result] = await getExecutor(executor).query(sql, values);
   return result.insertId;
 }
 
@@ -38,9 +44,13 @@ async function create(gadgetData, imagePath) {
  * @param {Object} filters - Optional filters (type, status, search).
  * @returns {Promise<Array>} Array of gadget rows with joined specs.
  */
-async function findAll(filters = {}) {
+async function findAll(filters = {}, executor) {
   const conditions = [];
   const values = [];
+
+  if (!filters.includeDeleted) {
+    conditions.push('g.deleted_at IS NULL');
+  }
 
   if (filters.type) {
     conditions.push('g.type = ?');
@@ -68,6 +78,7 @@ async function findAll(filters = {}) {
       l.processor AS laptop_processor,
       l.ram AS laptop_ram,
       l.storage AS laptop_storage,
+      l.battery_hours AS laptop_battery_hours,
       l.screen_size AS laptop_screen_size,
       l.graphics AS laptop_graphics,
       p.os AS phone_os,
@@ -82,7 +93,7 @@ async function findAll(filters = {}) {
     ${whereClause}
     ORDER BY g.created_at DESC
   `;
-  const [rows] = await pool.query(sql, values);
+  const [rows] = await getExecutor(executor).query(sql, values);
   return rows;
 }
 
@@ -92,13 +103,15 @@ async function findAll(filters = {}) {
  * @param {number} id - Gadget ID.
  * @returns {Promise<Object|null>} The gadget row with spec details or null if not found.
  */
-async function findById(id) {
+async function findById(id, executor, options = {}) {
+  const includeDeleted = options.includeDeleted === true;
   const sql = `
     SELECT
       g.*, 
       l.processor AS laptop_processor,
       l.ram AS laptop_ram,
       l.storage AS laptop_storage,
+      l.battery_hours AS laptop_battery_hours,
       l.screen_size AS laptop_screen_size,
       l.graphics AS laptop_graphics,
       p.os AS phone_os,
@@ -111,9 +124,10 @@ async function findById(id) {
     LEFT JOIN laptop_specs l ON g.id = l.gadget_id
     LEFT JOIN phone_specs p ON g.id = p.gadget_id
     WHERE g.id = ?
+      ${includeDeleted ? '' : 'AND g.deleted_at IS NULL'}
     LIMIT 1
   `;
-  const [rows] = await pool.query(sql, [id]);
+  const [rows] = await getExecutor(executor).query(sql, [id]);
   return rows[0] || null;
 }
 
@@ -129,7 +143,7 @@ async function findById(id) {
  * @param {string|null} imagePath - New image path if provided.
  * @returns {Promise<boolean>} True if any rows were updated.
  */
-async function update(id, gadgetData, imagePath = null) {
+async function update(id, gadgetData, imagePath = null, executor) {
   // Build dynamic SET clause based on provided fields
   const fields = [];
   const values = [];
@@ -150,8 +164,8 @@ async function update(id, gadgetData, imagePath = null) {
 
   values.push(id);
   const sql = `UPDATE gadgets SET ${fields.join(', ')} WHERE id = ?`;
-  const [result] = await pool.query(sql, values);
-  return result.affectedRows > 0;
+  await getExecutor(executor).query(sql, values);
+  return true;
 }
 
 /**
@@ -160,15 +174,49 @@ async function update(id, gadgetData, imagePath = null) {
  * @param {number} id - Gadget ID.
  * @returns {Promise<boolean>} True if a row was deleted.
  */
-async function remove(id) {
-  const [result] = await pool.query('DELETE FROM gadgets WHERE id = ?', [id]);
+async function remove(id, deletedBy = null, executor) {
+  const [result] = await getExecutor(executor).query(
+    'UPDATE gadgets SET deleted_at = NOW(), deleted_by = ? WHERE id = ? AND deleted_at IS NULL',
+    [deletedBy, id]
+  );
   return result.affectedRows > 0;
+}
+
+async function restore(id, executor) {
+  const [result] = await getExecutor(executor).query(
+    'UPDATE gadgets SET deleted_at = NULL, deleted_by = NULL WHERE id = ? AND deleted_at IS NOT NULL',
+    [id]
+  );
+  return result.affectedRows > 0;
+}
+
+async function findDeleted(executor) {
+  const sql = `
+    SELECT
+      g.id,
+      g.name,
+      g.type,
+      g.brand,
+      g.model,
+      g.status,
+      g.deleted_at,
+      g.deleted_by,
+      g.cost_price,
+      g.list_price
+    FROM gadgets g
+    WHERE g.deleted_at IS NOT NULL
+    ORDER BY g.deleted_at DESC
+  `;
+  const [rows] = await getExecutor(executor).query(sql);
+  return rows;
 }
 
 module.exports = {
   create,
   findAll,
   findById,
+  findDeleted,
+  restore,
   update,
   delete: remove
 };

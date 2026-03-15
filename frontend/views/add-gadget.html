@@ -3,64 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sika Prime Gadget Manager – Add Gadget</title>
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/card.css">
+  <title>Sika Prime Gadget Manager - Add Gadget</title>
+  <link rel="stylesheet" href="/css/add-gadget.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
-<body>
+<body class="add-page">
   <header>
-    <h1>Sika Prime Gadget Manager</h1>
+    <div class="header-brand">
+      <span class="header-brand__mark">
+        <img src="/images/sika-prime-loans-logo.svg" alt="" class="header-brand__logo">
+      </span>
+      <div class="header-brand__copy">
+        <span class="header-brand__eyebrow">Sika Prime Loans</span>
+        <h1>Gadget Manager</h1>
+      </div>
+    </div>
     <nav>
-      <a href="index.html">Inventory</a>
-      <a href="add-gadget.html">Add Gadget</a>
-      <a href="sales-report.html">Sales Report</a>
+      <a href="/index.html">Inventory</a>
+      <a href="/add-gadget.html" aria-current="page">Add Gadget</a>
+      <a href="/sales-report.html">Sales</a>
+      <a href="/users.html">Users</a>
       <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
 
-  <main>
-    <h2>Add Gadget</h2>
-    <form id="gadget-form" enctype="multipart/form-data">
-      <label>
-        Name
-        <input type="text" name="name" required>
-      </label>
-      <label>
-        Type
-        <select name="type" id="type-selector" required>
-          <option value="">Select type</option>
-          <option value="laptop">Laptop</option>
-          <option value="phone">Phone</option>
-        </select>
-      </label>
-      <label>
-        Brand
-        <input type="text" name="brand">
-      </label>
-      <label>
-        Model
-        <input type="text" name="model">
-      </label>
-      <label>
-        Cost Price
-        <input type="number" name="cost_price" step="0.01" required>
-      </label>
-      <label>
-        Description
-        <textarea name="description" rows="4"></textarea>
-      </label>
-      <label>
-        Image
-        <input type="file" name="image" accept="image/*">
-      </label>
-      <div id="spec-container">
-        <!-- Dynamic specification fields will be inserted here by forms.js -->
+  <main class="page-shell add-gadget-page">
+    <section class="page-hero page-hero--editor">
+      <div class="page-hero__content">
+        <span class="page-hero__eyebrow">Add Gadget</span>
+        <h2>Save a gadget in a few steps.</h2>
+        <p>Enter the basics, recovery amount, optional price, specs, and a photo.</p>
+        <div class="hero-ribbon">
+          <span class="metric-chip">Laptop</span>
+          <span class="metric-chip">Phone</span>
+          <span class="metric-chip metric-chip--accent">Other</span>
+        </div>
       </div>
-      <button type="submit">Save Gadget</button>
+      <div class="hero-meta">
+        <div class="hero-highlight">
+          <strong>Start with recovery</strong>
+          <span>Profit or loss is confirmed after the sale.</span>
+        </div>
+      </div>
+    </section>
+
+    <p id="form-message" class="page-message" hidden></p>
+    <form id="gadget-form" enctype="multipart/form-data" class="editor-layout">
+      <div class="editor-layout__main">
+        <section class="panel-card">
+          <div class="section-header">
+            <div>
+              <h3>Basics</h3>
+              <p>Name, type, brand, and model.</p>
+            </div>
+            <span class="section-badge">Required</span>
+          </div>
+          <div class="form-grid">
+            <label>
+              Gadget Name
+              <input type="text" name="name" placeholder="e.g. HP ProBook 640 G5" required>
+            </label>
+            <label>
+              Device Type
+              <select name="type" id="type-selector" required>
+                <option value="">Select device type</option>
+                <option value="laptop">PC / Laptop</option>
+                <option value="phone">Phone</option>
+                <option value="other">Other Device</option>
+              </select>
+            </label>
+            <label>
+              Brand
+              <input type="text" name="brand" placeholder="e.g. HP, Dell, Samsung">
+            </label>
+            <label>
+              Model
+              <input type="text" name="model" placeholder="e.g. ProBook 640 G5">
+            </label>
+            <label class="field-span-full">
+              Notes
+              <textarea name="description" rows="4" placeholder="Condition, accessories, or anything helpful for the team."></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="section-header">
+            <div>
+              <h3>Recovery &amp; Pricing</h3>
+              <p>Set the recovery amount and optional list price.</p>
+            </div>
+            <span class="section-badge">Pricing</span>
+          </div>
+          <div class="form-grid">
+            <label>
+              Recovery Amount
+              <input type="number" name="cost_price" step="0.01" placeholder="Amount to recover" required>
+              <span class="field-hint">Amount to recover from the loan.</span>
+            </label>
+            <label>
+              List Price
+              <input type="number" name="list_price" step="0.01" placeholder="Optional planned listing price">
+              <span class="field-hint">Optional price for cards and posters.</span>
+            </label>
+          </div>
+          <div class="formula-card">
+            <strong>Final result</strong>
+            <p>Profit or loss uses the actual sale price.</p>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="section-header">
+            <div>
+              <h3>Specs</h3>
+              <p>Fields change by device type.</p>
+            </div>
+            <span class="section-badge">By type</span>
+          </div>
+          <div id="spec-container" class="form-grid spec-grid">
+            <!-- Dynamic specification fields will be inserted here by forms.js -->
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="section-header">
+            <div>
+              <h3>Photo</h3>
+              <p>Used on cards, details, and posters.</p>
+            </div>
+            <span class="section-badge">Optional</span>
+          </div>
+          <div class="upload-shell">
+            <strong>Upload image</strong>
+            <span class="field-hint">PNG, JPG, GIF, and WEBP supported.</span>
+            <label class="field-span-full upload-field">
+              Image
+              <input type="file" name="image" accept="image/*">
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <aside class="editor-layout__aside">
+        <section class="panel-card summary-card">
+          <div class="section-header">
+            <div>
+              <h3>Quick Summary</h3>
+              <p>Live totals while you type.</p>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-stat">
+              <span>Recovery</span>
+              <strong id="summary-recovery-target">K0.00</strong>
+            </div>
+            <div class="summary-stat">
+              <span>List price</span>
+              <strong id="summary-list-price">K0.00</strong>
+            </div>
+            <div class="summary-stat summary-stat--accent">
+              <span id="summary-variance-label">Difference</span>
+              <strong id="summary-variance">K0.00</strong>
+            </div>
+          </div>
+          <p id="summary-note" class="summary-note">Final profit or loss appears after the sale.</p>
+        </section>
+
+        <section class="panel-card action-card">
+          <div class="section-header">
+            <div>
+              <h3>Save</h3>
+              <p>Add this gadget to inventory.</p>
+            </div>
+          </div>
+          <div class="action-card__buttons">
+            <button type="submit">Save Gadget</button>
+            <a class="button-link secondary" href="/index.html">Back</a>
+          </div>
+        </section>
+      </aside>
     </form>
   </main>
 
-  <script src="/js/forms.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/forms.js"></script>
 </body>
 </html>

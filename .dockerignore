@@ -1,0 +1,7 @@
+.git
+.gitignore
+backend/.env
+backend/node_modules
+backend/.sessions
+frontend/public/uploads
+**/.DS_Store

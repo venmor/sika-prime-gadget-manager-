@@ -1,26 +1,68 @@
 /*
- * Database configuration.
+ * Database configuration helpers.
  *
- * This module exports a MySQL connection pool using mysql2/promise.
- * The pool uses environment variables defined in the `.env` file to
- * configure the database host, user, password and database name.
+ * Loads environment variables, validates the required database settings,
+ * creates a shared mysql2 pool, and exposes a small health check used
+ * during server startup.
  */
 
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
 
-// Load environment variables from .env file
 dotenv.config();
 
-// Create a connection pool for re‑use across the application
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
-  database: process.env.DB_NAME || 'sikaprime',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+function getDbEnv() {
+  return {
+    host: process.env.DB_HOST || process.env.MYSQLHOST,
+    port: process.env.DB_PORT || process.env.MYSQLPORT || 3306,
+    user: process.env.DB_USER || process.env.MYSQLUSER,
+    password: process.env.DB_PASS || process.env.MYSQLPASSWORD || '',
+    database: process.env.DB_NAME || process.env.MYSQLDATABASE
+  };
+}
 
-module.exports = pool;
+const REQUIRED_ENV_VARS = ['host', 'user', 'database'];
+
+function getMissingDbEnvVars() {
+  const dbEnv = getDbEnv();
+  return REQUIRED_ENV_VARS.filter((key) => !dbEnv[key]);
+}
+
+function createPool() {
+  const dbEnv = getDbEnv();
+  const missingVars = getMissingDbEnvVars();
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required database environment variables: ${missingVars.join(', ')}`
+    );
+  }
+
+  return mysql.createPool({
+    host: dbEnv.host,
+    port: Number(dbEnv.port || 3306),
+    user: dbEnv.user,
+    password: dbEnv.password,
+    database: dbEnv.database,
+    waitForConnections: true,
+    connectionLimit: Number(process.env.DB_CONNECTION_LIMIT || 10),
+    queueLimit: 0
+  });
+}
+
+const pool = createPool();
+
+async function checkDatabaseConnection() {
+  const connection = await pool.getConnection();
+  try {
+    await connection.ping();
+  } finally {
+    connection.release();
+  }
+}
+
+module.exports = {
+  pool,
+  checkDatabaseConnection,
+  getDbEnv,
+  getMissingDbEnvVars
+};

@@ -1,0 +1,2 @@
+ALTER TABLE `gadgets`
+ADD COLUMN IF NOT EXISTS `list_price` DECIMAL(10,2) DEFAULT NULL AFTER `cost_price`;

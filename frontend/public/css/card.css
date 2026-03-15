@@ -1,109 +1,643 @@
-/*
- * Card styles for gadget listings and advertisement generation.
- */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
 
 .card {
-  background-color: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(92, 122, 156, 0.14);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 250, 254, 0.96));
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  animation: fade-rise 420ms ease both;
 }
 
-.card img {
+.card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(14, 116, 144, 0.2);
+  box-shadow: 0 24px 36px rgba(18, 49, 76, 0.12);
+}
+
+.card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(14, 116, 144, 0.1), rgba(245, 158, 11, 0.12));
+}
+
+.card__media img,
+.card__media .no-image {
+  display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+}
+
+.card__media img {
   object-fit: cover;
-  border-radius: 4px;
+  transition: transform 240ms ease;
 }
 
-.card h3 {
-  margin-top: 0.75rem;
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  color: var(--primary-color);
+.card:hover .card__media img {
+  transform: scale(1.04);
 }
 
-.card p {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.card .actions {
-  margin-top: auto;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.card .actions button {
-  flex: 1;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #fff;
-  font-size: 0.9rem;
-}
-
-.card .actions button.edit {
-  background-color: var(--primary-color);
-}
-
-.card .actions button.delete {
-  background-color: #d9534f;
-}
-
-.card .actions button:hover {
-  opacity: 0.9;
-}
-
-/* Placeholder for cards without images */
 .card .no-image {
-  width: 100%;
-  height: 150px;
-  background-color: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  font-size: 0.9rem;
-  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* Advertisement card styles */
+.card__content {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.card__eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.card__title,
+.card__subtitle,
+.card__price,
+.card__meta-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.card__title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.card__subtitle {
+  margin: 0.1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.card__price {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0.45rem 0.72rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #9a6000;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.card__meta {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.card__meta-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-width: 0;
+  font-size: 0.92rem;
+  color: var(--text-body);
+}
+
+.card__meta-row strong {
+  color: var(--text-strong);
+  text-align: right;
+}
+
+.card__actions {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0 1rem 1rem;
+  margin-top: auto;
+}
+
+.card__actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 42px;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.card__actions .delete {
+  background: linear-gradient(135deg, #da5a5a, #ba3d3d);
+}
+
+/* =========================
+   Ad card
+========================= */
+
 .card--ad {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  min-height: 300px;
-  background-color: #fff;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  padding: 1.1rem;
+  border: 1px solid rgba(21, 58, 103, 0.18);
+  border-radius: 30px;
   overflow: hidden;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(236, 90, 153, 0.2), transparent 24%),
+    radial-gradient(circle at 82% 14%, rgba(41, 94, 189, 0.28), transparent 28%),
+    linear-gradient(145deg, #f7fbff 0%, #e6eefb 34%, #173968 34%, #0f2440 100%);
+  box-shadow: 0 26px 44px rgba(13, 31, 56, 0.22);
+  color: #17324b;
+}
+
+.card--ad::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 34px 34px;
+  pointer-events: none;
+}
+
+.card--ad__shell {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.9rem;
+  min-height: 100%;
+  min-width: 0;
+}
+
+.card--ad__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.card--ad__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(15, 36, 64, 0.08);
+  color: #1a4278;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  overflow-wrap: anywhere;
+}
+
+.card--ad__brandlock {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.card--ad__logo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+  padding: 0.35rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 10px 22px rgba(18, 49, 76, 0.12);
+}
+
+.card--ad__brandtext {
+  min-width: 0;
+  text-align: right;
+  color: #f6fbff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.card--ad__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 0.95rem;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.card--ad__content,
+.card--ad__visual,
+.card--ad__specs,
+.card--ad__spec-panel,
+.card--ad__headline {
+  min-width: 0;
+}
+
+.card--ad__content {
+  display: grid;
+  gap: 0.85rem;
   padding: 1rem;
-  box-sizing: border-box;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(20, 58, 102, 0.08);
+  box-shadow: 0 16px 26px rgba(18, 49, 76, 0.08);
+}
+
+.card--ad__headline {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.card--ad .brand,
+.card--ad .model,
+.card--ad .tagline,
+.card--ad__spec-item strong,
+.card--ad__cta strong,
+.card--ad__cta span,
+.card--ad__message,
+.card--ad .price {
+  overflow-wrap: anywhere;
 }
 
 .card--ad .brand {
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: var(--primary-color);
+  color: #102b46;
+  font-size: clamp(1.9rem, 3.3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 0.94;
+  text-transform: uppercase;
 }
 
 .card--ad .model {
-  font-size: 1.1rem;
-  margin-bottom: 0.25rem;
+  color: #4a6788;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.card--ad .tagline {
+  max-width: 32ch;
+  color: #35526f;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.card--ad__visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 1rem;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.28), transparent 34%),
+    linear-gradient(145deg, rgba(18, 57, 104, 0.98), rgba(10, 25, 45, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.card--ad__visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  filter: saturate(1.08) contrast(1.06) brightness(1.06) drop-shadow(0 24px 34px rgba(0, 0, 0, 0.28));
+}
+
+.card--ad__placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  border-radius: 20px;
+  border: 1px dashed rgba(255, 255, 255, 0.24);
+  color: rgba(255, 255, 255, 0.74);
+  font-weight: 700;
+  text-align: center;
+}
+
+.card--ad__specs {
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  margin-top: auto;
+}
+
+.card--ad__spec-panel {
+  padding: 0.95rem;
+  border-radius: 20px;
+  background: #f5f9ff;
+  border: 1px solid rgba(20, 58, 102, 0.1);
+}
+
+.card--ad__spec-panel h4 {
+  margin: 0 0 0.75rem;
+  color: #17324b;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.card--ad__spec-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.card--ad__spec-item {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.58fr) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  border: 1px solid rgba(20, 58, 102, 0.08);
+  background: linear-gradient(180deg, rgba(232, 241, 251, 0.9), rgba(255, 255, 255, 0.98));
+}
+
+.card--ad__spec-item span {
+  color: #5c7490;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.card--ad__spec-item strong {
+  color: #17324b;
+  font-size: 0.86rem;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.card--ad__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  padding: 0.2rem 0.1rem 0;
+}
+
+.card--ad__cta {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.card--ad__cta strong {
+  color: #ffffff;
+  font-size: 1.05rem;
+}
+
+.card--ad__cta span {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.84rem;
+}
+
+.card--ad__message {
+  max-width: min(100%, 34ch);
+  padding: 0.85rem 0.9rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(20, 58, 102, 0.08), rgba(236, 90, 153, 0.1));
+  color: #17324b;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .card--ad .price {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: var(--accent-color);
+  position: static;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 100%;
+  padding: 0.78rem 1.1rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, #f59e0b, #f97316),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 16px 28px rgba(249, 115, 22, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* ==========================================
+   Gadget detail page ad card preview fixes
+   Only affects gadget-detail.html context
+========================================== */
+
+.detail-page #ad-card-preview.card--ad {
+  aspect-ratio: auto;
+  min-height: 280px;
+  height: auto;
+  display: grid;
+  place-items: center;
+  padding: 0.95rem;
+  border-radius: 24px;
+}
+
+.detail-page #ad-card-preview.card--ad:empty {
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed var(--border-soft);
+  box-shadow: none;
+}
+
+.detail-page #ad-card-preview.card--ad:empty::before {
+  content: "Click 'Generate Ad Card' to preview";
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  display: block;
+}
+
+.detail-page #ad-card-preview.card--ad:not(:empty) {
+  display: block;
+  aspect-ratio: auto;
+  min-height: 280px;
+  height: auto;
+}
+
+.detail-page #ad-card-preview .card--ad__shell {
+  gap: 0.8rem;
+}
+
+.detail-page #ad-card-preview .card--ad__topline {
+  gap: 0.7rem;
+}
+
+.detail-page #ad-card-preview .card--ad__layout {
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+.detail-page #ad-card-preview .card--ad__content {
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 20px;
+}
+
+.detail-page #ad-card-preview .card--ad__headline {
+  gap: 0.3rem;
+}
+
+.detail-page #ad-card-preview .card--ad__visual {
+  min-height: 240px;
+  padding: 0.85rem;
+  border-radius: 22px;
+}
+
+.detail-page #ad-card-preview .card--ad__visual img {
+  max-height: 260px;
+}
+
+.detail-page #ad-card-preview .card--ad__spec-panel {
+  padding: 0.8rem;
+  border-radius: 18px;
+}
+
+.detail-page #ad-card-preview .card--ad__spec-item {
+  grid-template-columns: minmax(68px, 0.48fr) minmax(0, 1fr);
+  padding: 0.6rem 0.7rem;
+  border-radius: 14px;
+}
+
+.detail-page #ad-card-preview .card--ad__footer {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.detail-page #ad-card-preview .card--ad__message {
+  max-width: 100%;
+}
+
+.detail-page .card--ad .brand {
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
+}
+
+.detail-page .card--ad .model {
+  font-size: 0.8rem;
+}
+
+.detail-page .card--ad .tagline {
+  max-width: 100%;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.detail-page .card--ad__spec-item span {
+  font-size: 0.6rem;
+}
+
+.detail-page .card--ad__spec-item strong {
+  font-size: 0.75rem;
+}
+
+.detail-page .card--ad .price {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+/* =========================
+   Responsive
+========================= */
+
+@media (max-width: 900px) {
+  .card--ad {
+    aspect-ratio: auto;
+    min-height: 640px;
+  }
+
+  .card--ad__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .card--ad__visual {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .card__actions {
+    flex-wrap: wrap;
+  }
+
+  .card__actions button {
+    flex: 1 1 calc(50% - 0.3rem);
+  }
+
+  .card--ad {
+    min-height: 0;
+    padding: 0.95rem;
+    border-radius: 24px;
+  }
+
+  .card--ad__topline,
+  .card--ad__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card--ad__brandlock {
+    width: 100%;
+  }
+
+  .card--ad__brandtext {
+    text-align: left;
+  }
+
+  .card--ad .price {
+    justify-self: start;
+    white-space: normal;
+  }
+
+  .card--ad__spec-item {
+    grid-template-columns: 1fr;
+  }
+
+  .card--ad__content,
+  .card--ad__visual,
+  .card--ad__spec-panel {
+    border-radius: 18px;
+  }
+
+  .detail-page #ad-card-preview .card--ad__visual {
+    min-height: 220px;
+  }
+
+  .detail-page #ad-card-preview .card--ad__visual img {
+    max-height: 220px;
+  }
 }

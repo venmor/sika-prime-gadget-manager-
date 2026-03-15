@@ -3,42 +3,131 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sika Prime Gadget Manager – Inventory</title>
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/card.css">
+  <title>Sika Prime Gadget Manager - Inventory</title>
+  <link rel="stylesheet" href="/css/inventory.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
   <header>
-    <h1>Sika Prime Gadget Manager</h1>
+    <div class="header-brand">
+      <span class="header-brand__mark">
+        <img src="/images/sika-prime-loans-logo.svg" alt="" class="header-brand__logo">
+      </span>
+      <div class="header-brand__copy">
+        <span class="header-brand__eyebrow">Sika Prime Loans</span>
+        <h1>Gadget Manager</h1>
+      </div>
+    </div>
     <nav>
-      <a href="index.html">Inventory</a>
-      <a href="add-gadget.html">Add Gadget</a>
-      <a href="sales-report.html">Sales Report</a>
+      <a href="/index.html" aria-current="page">Inventory</a>
+      <a href="/add-gadget.html">Add Gadget</a>
+      <a href="/sales-report.html">Sales</a>
+      <a href="/users.html">Users</a>
       <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
 
-  <main>
-    <section class="filters">
-      <input type="text" id="search" placeholder="Search by name, brand, model">
-      <select id="filter-type">
-        <option value="">All Types</option>
-        <option value="laptop">Laptops</option>
-        <option value="phone">Phones</option>
-      </select>
-      <select id="filter-status">
-        <option value="">All Status</option>
-        <option value="available">Available</option>
-        <option value="sold">Sold</option>
-      </select>
-      <button id="filter-btn">Filter</button>
+  <main class="page-shell inventory-page">
+    <section class="page-hero page-hero--inventory">
+      <div class="page-hero__content">
+        <span class="page-hero__eyebrow">Inventory</span>
+        <h2>Inventory at a glance.</h2>
+        <p>See what is available, sold, and ready to post.</p>
+        <div class="page-hero__actions">
+          <a class="button-link" href="/add-gadget.html">Add gadget</a>
+          <a class="button-link secondary" href="/sales-report.html">View sales</a>
+        </div>
+        <div class="hero-ribbon">
+          <span class="metric-chip" id="hero-total-count">0 items</span>
+          <span class="metric-chip" id="hero-sold-count">0 sold</span>
+          <span class="metric-chip metric-chip--accent">Ready for ads</span>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-highlight">
+          <strong id="hero-available-count">0 available</strong>
+          <span>In stock now.</span>
+        </div>
+      </div>
     </section>
-    <section id="gadget-list" class="card-container">
-      <!-- Gadget cards will be injected here by JavaScript in Section 7 -->
+
+    <section class="stats-grid stats-grid--inventory">
+      <article class="stat-card">
+        <span class="stat-card__label">Inventory</span>
+        <p class="stat-card__value" id="stat-total">0</p>
+        <p class="stat-card__hint">All saved gadgets.</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__label">Available</span>
+        <p class="stat-card__value" id="stat-available">0</p>
+        <p class="stat-card__hint">Still open for sale.</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__label">Sold</span>
+        <p class="stat-card__value" id="stat-sold">0</p>
+        <p class="stat-card__hint">Completed sales.</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__label">Priced</span>
+        <p class="stat-card__value" id="stat-priced">0</p>
+        <p class="stat-card__hint">With a list price.</p>
+      </article>
+    </section>
+
+    <p id="inventory-message" class="page-message" hidden></p>
+
+    <section class="section-card section-card--toolbar">
+      <div class="section-header">
+        <div>
+          <h3>Find gadgets</h3>
+          <p>Search by name, brand, model, type, or status.</p>
+        </div>
+        <span class="section-badge">Filters</span>
+      </div>
+      <div class="inventory-toolbar">
+        <label class="filter-field">
+          <span>Search</span>
+          <input type="text" id="search" placeholder="Search by name, brand, or model">
+        </label>
+        <label class="filter-field">
+          <span>Type</span>
+          <select id="filter-type">
+            <option value="">All Types</option>
+            <option value="laptop">Laptops</option>
+            <option value="phone">Phones</option>
+            <option value="other">Other Devices</option>
+          </select>
+        </label>
+        <label class="filter-field">
+          <span>Status</span>
+          <select id="filter-status">
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="sold">Sold</option>
+          </select>
+        </label>
+        <div class="filter-actions">
+          <button id="filter-btn">Apply filters</button>
+          <a class="button-link secondary" href="/add-gadget.html">Add gadget</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-card section-card--inventory">
+      <div class="section-header">
+        <div>
+          <h3>Inventory</h3>
+          <p>Open a gadget to edit it, sell it, or export a poster.</p>
+        </div>
+        <span class="section-badge">Cards</span>
+      </div>
+      <section id="gadget-list" class="card-container">
+        <!-- Gadget cards will be injected here by JavaScript -->
+      </section>
     </section>
   </main>
 
-  <script src="/js/main.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/main.js"></script>
 </body>
 </html>

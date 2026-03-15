@@ -5,20 +5,31 @@
  * pool exported from `config/db.js`.
  */
 
-const pool = require('../config/db');
+const { pool } = require('../config/db');
+
+function getExecutor(executor) {
+  return executor || pool;
+}
 
 /**
  * Create a new laptop specification entry.
  *
  * @param {number} gadgetId - Foreign key referencing the gadget.
- * @param {Object} specData - Specification fields: processor, ram, storage, screen_size, graphics.
+ * @param {Object} specData - Specification fields: processor, ram, storage, battery_hours, screen_size, graphics.
  * @returns {Promise<number>} ID of the inserted row.
  */
-async function create(gadgetId, specData) {
-  const { processor = null, ram = null, storage = null, screen_size = null, graphics = null } = specData;
-  const sql = `INSERT INTO laptop_specs (gadget_id, processor, ram, storage, screen_size, graphics) VALUES (?, ?, ?, ?, ?, ?)`;
-  const values = [gadgetId, processor, ram, storage, screen_size, graphics];
-  const [result] = await pool.query(sql, values);
+async function create(gadgetId, specData, executor) {
+  const {
+    processor = null,
+    ram = null,
+    storage = null,
+    battery_hours = null,
+    screen_size = null,
+    graphics = null
+  } = specData;
+  const sql = `INSERT INTO laptop_specs (gadget_id, processor, ram, storage, battery_hours, screen_size, graphics) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const values = [gadgetId, processor, ram, storage, battery_hours, screen_size, graphics];
+  const [result] = await getExecutor(executor).query(sql, values);
   return result.insertId;
 }
 
@@ -29,7 +40,7 @@ async function create(gadgetId, specData) {
  * @param {Object} specData - Specification fields to update.
  * @returns {Promise<boolean>} True if a row was updated.
  */
-async function update(gadgetId, specData) {
+async function update(gadgetId, specData, executor) {
   const fields = [];
   const values = [];
 
@@ -42,11 +53,16 @@ async function update(gadgetId, specData) {
   }
   values.push(gadgetId);
   const sql = `UPDATE laptop_specs SET ${fields.join(', ')} WHERE gadget_id = ?`;
-  const [result] = await pool.query(sql, values);
+  const [result] = await getExecutor(executor).query(sql, values);
   return result.affectedRows > 0;
+}
+
+async function removeByGadgetId(gadgetId, executor) {
+  await getExecutor(executor).query('DELETE FROM laptop_specs WHERE gadget_id = ?', [gadgetId]);
 }
 
 module.exports = {
   create,
-  update
+  update,
+  removeByGadgetId
 };

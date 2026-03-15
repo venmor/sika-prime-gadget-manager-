@@ -3,39 +3,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sika Prime Gadget Manager – Sales Report</title>
-  <link rel="stylesheet" href="/css/main.css">
+  <title>Sika Prime Gadget Manager - Sales Report</title>
+  <link rel="stylesheet" href="/css/sales-report.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
-<body>
+<body class="sales-page">
   <header>
-    <h1>Sika Prime Gadget Manager</h1>
+    <div class="header-brand">
+      <span class="header-brand__mark">
+        <img src="/images/sika-prime-loans-logo.svg" alt="" class="header-brand__logo">
+      </span>
+      <div class="header-brand__copy">
+        <span class="header-brand__eyebrow">Sika Prime Loans</span>
+        <h1>Gadget Manager</h1>
+      </div>
+    </div>
     <nav>
-      <a href="index.html">Inventory</a>
-      <a href="add-gadget.html">Add Gadget</a>
-      <a href="sales-report.html">Sales Report</a>
+      <a href="/index.html">Inventory</a>
+      <a href="/add-gadget.html">Add Gadget</a>
+      <a href="/sales-report.html" aria-current="page">Sales</a>
+      <a href="/users.html">Users</a>
       <a href="#" id="logout-link">Logout</a>
     </nav>
   </header>
-  <main>
-    <h2>Sales Report</h2>
-    <p id="sales-message" style="display: none;"></p>
-    <table id="sales-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Gadget</th>
-          <th>Buyer</th>
-          <th>Selling Price (K)</th>
-          <th>Profit (K)</th>
-          <th>Date Sold</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Sales rows will be dynamically inserted here -->
-      </tbody>
-    </table>
+  <main class="page-shell sales-page__main">
+    <section class="page-hero page-hero--sales">
+      <div class="page-hero__content">
+        <span class="page-hero__eyebrow">Sales</span>
+        <h2>Sales and deleted history.</h2>
+        <p>Check revenue, profit or loss, and removed items.</p>
+        <div class="hero-ribbon">
+          <span class="metric-chip">Sold</span>
+          <span class="metric-chip">Profit / Loss</span>
+          <span class="metric-chip metric-chip--accent">Deleted</span>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-highlight">
+          <strong id="sales-total-profit">K0.00</strong>
+          <span>Total profit or loss.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-card__label">Units Sold</span>
+        <p class="stat-card__value" id="sales-count">0</p>
+        <p class="stat-card__hint">All saved sales.</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__label">Revenue</span>
+        <p class="stat-card__value" id="sales-revenue">K0.00</p>
+        <p class="stat-card__hint">Total sale amount.</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__label">Average Gain / Loss</span>
+        <p class="stat-card__value" id="sales-average-profit">K0.00</p>
+        <p class="stat-card__hint">Average result per sale.</p>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__label">Deleted Items</span>
+        <p class="stat-card__value" id="sales-deleted-count">0</p>
+        <p class="stat-card__hint">Removed but still tracked.</p>
+      </article>
+    </section>
+
+    <section class="section-card">
+      <div class="section-header">
+        <div>
+          <h3>Sales History</h3>
+          <p>Recent sales and results.</p>
+        </div>
+        <span class="section-badge">Sales</span>
+      </div>
+      <p id="sales-message" class="page-message" hidden></p>
+      <div class="table-shell">
+        <table id="sales-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Gadget</th>
+              <th>Buyer</th>
+              <th>Recovery (K)</th>
+              <th>Sale (K)</th>
+              <th>Profit / Loss (K)</th>
+              <th>Status</th>
+              <th>Date Sold</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Sales rows will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <div class="section-header">
+        <div>
+          <h3>Deleted Items</h3>
+          <p>Removed records that can still be restored.</p>
+        </div>
+        <span class="section-badge">Archive</span>
+      </div>
+      <p id="deleted-items-message" class="page-message" hidden></p>
+      <div class="table-shell">
+        <table id="deleted-items-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Gadget</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Recovery (K)</th>
+              <th>Deleted By</th>
+              <th>Deleted At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Deleted history rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
-  <script src="/js/salesReport.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="/js/salesReport.js"></script>
 </body>
 </html>

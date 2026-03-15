@@ -4,7 +4,11 @@
  * with a phone gadget. Functions leverage the shared connection pool.
  */
 
-const pool = require('../config/db');
+const { pool } = require('../config/db');
+
+function getExecutor(executor) {
+  return executor || pool;
+}
 
 /**
  * Create a new phone specification entry.
@@ -13,7 +17,7 @@ const pool = require('../config/db');
  * @param {Object} specData - Specification fields: os, ram, storage, screen_size, camera, battery.
  * @returns {Promise<number>} ID of the inserted row.
  */
-async function create(gadgetId, specData) {
+async function create(gadgetId, specData, executor) {
   const {
     os = null,
     ram = null,
@@ -24,7 +28,7 @@ async function create(gadgetId, specData) {
   } = specData;
   const sql = `INSERT INTO phone_specs (gadget_id, os, ram, storage, screen_size, camera, battery) VALUES (?, ?, ?, ?, ?, ?, ?)`;
   const values = [gadgetId, os, ram, storage, screen_size, camera, battery];
-  const [result] = await pool.query(sql, values);
+  const [result] = await getExecutor(executor).query(sql, values);
   return result.insertId;
 }
 
@@ -35,7 +39,7 @@ async function create(gadgetId, specData) {
  * @param {Object} specData - Specification fields to update.
  * @returns {Promise<boolean>} True if a row was updated.
  */
-async function update(gadgetId, specData) {
+async function update(gadgetId, specData, executor) {
   const fields = [];
   const values = [];
   for (const [key, value] of Object.entries(specData)) {
@@ -47,11 +51,16 @@ async function update(gadgetId, specData) {
   }
   values.push(gadgetId);
   const sql = `UPDATE phone_specs SET ${fields.join(', ')} WHERE gadget_id = ?`;
-  const [result] = await pool.query(sql, values);
+  const [result] = await getExecutor(executor).query(sql, values);
   return result.affectedRows > 0;
+}
+
+async function removeByGadgetId(gadgetId, executor) {
+  await getExecutor(executor).query('DELETE FROM phone_specs WHERE gadget_id = ?', [gadgetId]);
 }
 
 module.exports = {
   create,
-  update
+  update,
+  removeByGadgetId
 };

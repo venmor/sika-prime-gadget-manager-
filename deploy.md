@@ -1,145 +1,226 @@
-# Deployment Guide for Sika Prime Gadget Manager
+# VPS Deployment Guide
 
-This document provides high‑level instructions for deploying the Sika Prime Gadget Manager web application to a production environment such as Heroku or a self‑managed VPS. The project consists of a Node.js/Express backend, a MySQL database, and static frontend assets.
+This project is best deployed on a single VPS with:
 
-## Prerequisites
+- Node.js 18+
+- MariaDB or MySQL
+- PM2
+- nginx
+- HTTPS via Let's Encrypt
 
-* **Node.js** (version 14 or newer) and **npm** installed on the server.
-* **MySQL** database server. You can use a managed MySQL service (e.g., Amazon RDS, ClearDB on Heroku) or install MySQL locally.
-* Access to environment variables or a mechanism to configure them securely in your hosting platform.
+The frontend does not need a separate build step. Express serves the HTML, CSS, JS, images, uploads, and API from the same app.
 
-## Environment Configuration
+## 1. Prepare the server
 
-1. Clone the repository and navigate into the project directory:
-
-   ```bash
-   git clone https://your-repo-url/sika-prime-gadget-manager.git
-   cd sika-prime-gadget-manager/backend
-   ```
-
-2. Copy `.env.example` to `.env` and set the following variables:
-
-   * `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`: MySQL connection details.
-   * `PORT`: Port for the Express server (use Heroku’s `PORT` environment variable on Heroku).
-   * `SESSION_SECRET`: A long, random string used to sign session cookies.
-   * `ADMIN_USERNAME`: The administrator’s login name.
-   * `ADMIN_PASSWORD_HASH`: A bcrypt hash of the administrator’s password. Use a Node REPL or online bcrypt generator to produce this hash. Example:
-
-     ```js
-     // In a Node REPL
-     const bcrypt = require('bcryptjs');
-     bcrypt.hash('your-password', 10).then(hash => console.log(hash));
-     ```
-
-3. Install backend dependencies:
-
-   ```bash
-   npm install
-   ```
-
-4. Set up the database:
-
-   * Create a database using your MySQL client (`CREATE DATABASE sikaprime;`).
-   * Run the SQL migration script located in `database/migrations/create_tables.sql` to create the necessary tables. For example:
-
-     ```bash
-     mysql -u youruser -p sikaprime < ../database/migrations/create_tables.sql
-     ```
-
-5. (Optional) Seed the database by adding SQL scripts into the `database/seeds` folder and running them via `mysql`.
-
-## Running Locally
-
-To run the application locally for testing:
+These commands assume Ubuntu 22.04 or a similar Debian-based server.
 
 ```bash
-cd backend
-node server.js
+sudo apt update
+sudo apt install -y nginx mariadb-server mariadb-client
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+sudo npm install -g pm2
+sudo apt install -y certbot python3-certbot-nginx
 ```
 
-Visit `http://localhost:3000/login.html` to log in with your admin credentials. After logging in you can access the inventory, add gadgets, generate advertisement cards, record sales and view the sales report.
+Check versions:
 
-## Deploying to Heroku
+```bash
+node -v
+npm -v
+mariadb --version
+nginx -v
+pm2 -v
+```
 
-1. Create a new Heroku app:
+## 2. Create the app directory
 
-   ```bash
-   heroku create sika-prime-gadget-manager
-   ```
+```bash
+cd /var/www
+sudo mkdir -p /var/www/sika-prime-gadget-manager
+sudo chown -R $USER:$USER /var/www/sika-prime-gadget-manager
+git clone <your-repo-url> /var/www/sika-prime-gadget-manager
+cd /var/www/sika-prime-gadget-manager
+```
 
-2. Add a MySQL add‑on such as ClearDB or JawsDB:
+## 3. Create the database
 
-   ```bash
-   heroku addons:create cleardb:ignite
-   ```
+Open MariaDB:
 
-   Note the connection URL returned by Heroku and parse it into your `.env` variables (host, user, password, database name).
+```bash
+sudo mariadb
+```
 
-3. Set your environment variables on Heroku:
+Run:
 
-   ```bash
-   heroku config:set SESSION_SECRET=your-session-secret
-   heroku config:set ADMIN_USERNAME=admin
-   heroku config:set ADMIN_PASSWORD_HASH=your-bcrypt-hash
-   heroku config:set DB_HOST=... DB_USER=... DB_PASS=... DB_NAME=...
-   ```
+```sql
+CREATE DATABASE sikaprime CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'sikaprime'@'localhost' IDENTIFIED BY 'replace-with-a-strong-password';
+GRANT ALL PRIVILEGES ON sikaprime.* TO 'sikaprime'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
 
-4. Commit a `Procfile` to define how Heroku runs the app. In the project root (`sika-prime-gadget-manager`) create a file named `Procfile` with the following content:
+Run the migrations:
 
-   ```
-   web: node backend/server.js
-   ```
+```bash
+mariadb -u sikaprime -p sikaprime < database/migrations/create_tables.sql
+mariadb -u sikaprime -p sikaprime < database/migrations/20260314_add_list_price.sql
+```
 
-5. Push your code to Heroku:
+If the second file is not needed for your database state, you can skip it.
 
-   ```bash
-   git push heroku master
-   ```
+## 4. Install backend dependencies
 
-6. Run your migrations on the Heroku database. You can execute the SQL script using the MySQL client installed on your machine:
+```bash
+cd /var/www/sika-prime-gadget-manager/backend
+npm install
+npx playwright install --with-deps chromium
+```
 
-   ```bash
-   heroku config:get CLEARDB_DATABASE_URL  # Use credentials from here
-   # Then connect via mysql and run the migration file
-   mysql -h host -u user -p password database < database/migrations/create_tables.sql
-   ```
+`Playwright` is required for the ad export feature. Without Chromium installed, poster export will fail.
 
-7. Navigate to `https://sika-prime-gadget-manager.herokuapp.com/login.html` to log in and use the application.
+## 5. Create production environment variables
 
-## Deploying to a VPS
+Copy the example file:
 
-1. Provision a VPS with Node.js and MySQL installed.
-2. Clone the repository and follow the environment configuration steps above.
-3. Use a process manager such as **PM2** or **systemd** to run `node backend/server.js` as a service.
-4. Configure a web server such as **nginx** to proxy requests to your Node.js application and serve static assets. Example nginx configuration:
+```bash
+cd /var/www/sika-prime-gadget-manager/backend
+cp .env.example .env
+```
 
-   ```nginx
-   server {
-     listen 80;
-     server_name your-domain.com;
-     root /path/to/sika-prime-gadget-manager/frontend/public;
+Edit `backend/.env` and set:
 
-     location /api/ {
-       proxy_pass http://localhost:3000/api/;
-       proxy_http_version 1.1;
-       proxy_set_header Upgrade $http_upgrade;
-       proxy_set_header Connection 'upgrade';
-       proxy_set_header Host $host;
-       proxy_cache_bypass $http_upgrade;
-     }
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=sikaprime
+DB_PASS=replace-with-your-db-password
+DB_NAME=sikaprime
+DB_CONNECTION_LIMIT=10
+PORT=3000
+SESSION_SECRET=replace-with-a-long-random-string
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD_HASH=replace-with-a-bcrypt-hash
+```
 
-     location / {
-       try_files $uri $uri/ /index.html;
-     }
-   }
-   ```
+Generate a bcrypt password hash:
 
-5. Obtain an SSL certificate using Let’s Encrypt and configure nginx to serve HTTPS traffic.
+```bash
+cd /var/www/sika-prime-gadget-manager/backend
+node -e "require('bcryptjs').hash('replace-with-admin-password', 10).then(console.log)"
+```
 
-## Security Considerations
+Generate a session secret:
 
-* Always use HTTPS in production; set the `secure` flag on session cookies.
-* Store sensitive configuration (database credentials, session secret, admin password hash) in environment variables, not in version control.
-* Restrict direct access to the backend server by using a reverse proxy (e.g., nginx) and firewall rules.
+```bash
+cd /var/www/sika-prime-gadget-manager/backend
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-Follow these steps and adapt them to the specifics of your hosting environment. For more details on deploying Node.js and MySQL applications, consult the documentation of your chosen platform.
+## 6. Verify the app before starting PM2
+
+```bash
+cd /var/www/sika-prime-gadget-manager/backend
+npm run db:check
+NODE_ENV=production npm start
+```
+
+If the app starts, stop it with `Ctrl+C` and continue.
+
+## 7. Start the app with PM2
+
+From the repo root:
+
+```bash
+cd /var/www/sika-prime-gadget-manager
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup
+```
+
+When `pm2 startup` prints a command, run that command too.
+
+Useful PM2 commands:
+
+```bash
+pm2 status
+pm2 logs sika-prime-gadget-manager
+pm2 restart sika-prime-gadget-manager
+pm2 stop sika-prime-gadget-manager
+```
+
+## 8. Configure nginx
+
+Copy the example config from:
+
+[`deploy/nginx/sika-prime-gadget-manager.conf.example`](/home/charlie/sika-prime-gadget-manager/deploy/nginx/sika-prime-gadget-manager.conf.example)
+
+Install it:
+
+```bash
+sudo cp /var/www/sika-prime-gadget-manager/deploy/nginx/sika-prime-gadget-manager.conf.example /etc/nginx/sites-available/sika-prime-gadget-manager
+sudo nano /etc/nginx/sites-available/sika-prime-gadget-manager
+```
+
+Change `server_name` to your real domain.
+
+Enable the site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/sika-prime-gadget-manager /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+## 9. Enable HTTPS
+
+```bash
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+```
+
+Then test auto-renew:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+## 10. Verify the deployment
+
+Health checks:
+
+```bash
+curl http://127.0.0.1:3000/api/health
+curl http://127.0.0.1:3000/api/health/db
+curl https://your-domain.com/api/health
+curl https://your-domain.com/api/health/db
+```
+
+Browser URL:
+
+```text
+https://your-domain.com/login.html
+```
+
+## 11. Important runtime notes
+
+- Sessions are stored on disk in `backend/.sessions`.
+- Uploaded gadget images are stored on disk in `frontend/public/uploads`.
+- Keep the app on one VPS unless you later move sessions and uploads to shared storage.
+- In production, the app sets secure cookies when `NODE_ENV=production`, so HTTPS is required.
+
+## 12. Updating the app later
+
+```bash
+cd /var/www/sika-prime-gadget-manager
+git pull
+cd backend
+npm install
+npx playwright install chromium
+npm run db:check
+cd ..
+pm2 restart sika-prime-gadget-manager
+```
+
+If a new migration is added, run it before restarting PM2.

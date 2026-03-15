@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sika Prime Gadget Manager - Users</title>
+  <link rel="stylesheet" href="/css/users.css">
+  <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body class="users-page">
+  <header>
+    <div class="header-brand">
+      <span class="header-brand__mark">
+        <img src="/images/sika-prime-loans-logo.svg" alt="" class="header-brand__logo">
+      </span>
+      <div class="header-brand__copy">
+        <span class="header-brand__eyebrow">Sika Prime Loans</span>
+        <h1>Gadget Manager</h1>
+      </div>
+    </div>
+    <nav>
+      <a href="/index.html">Inventory</a>
+      <a href="/add-gadget.html">Add Gadget</a>
+      <a href="/sales-report.html">Sales</a>
+      <a href="/users.html" aria-current="page">Users</a>
+      <a href="#" id="logout-link">Logout</a>
+    </nav>
+  </header>
+
+  <main class="page-shell users-main">
+    <section class="page-hero page-hero--users">
+      <div class="page-hero__content">
+        <span class="page-hero__eyebrow">Access</span>
+        <h2>Users and passwords.</h2>
+        <p>Manage your account and team access.</p>
+        <div class="hero-ribbon">
+          <span class="metric-chip">Logins</span>
+          <span class="metric-chip">Roles</span>
+          <span class="metric-chip metric-chip--accent">Resets</span>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-highlight">
+          <strong id="current-user-role">Staff access</strong>
+          <span id="current-user-summary">Your access details appear here.</span>
+        </div>
+      </div>
+    </section>
+
+    <p id="users-page-message" class="page-message" hidden></p>
+
+    <section class="account-grid">
+      <article class="panel-card account-card">
+        <div class="section-header">
+          <div>
+            <h3>My Account</h3>
+            <p>Signed-in details.</p>
+          </div>
+          <span class="section-badge" id="must-change-badge" hidden>Update required</span>
+        </div>
+        <div class="account-summary">
+          <div class="summary-row">
+            <span>Name</span>
+            <strong id="account-name">Signed in user</strong>
+          </div>
+          <div class="summary-row">
+            <span>Username</span>
+            <strong id="account-username">-</strong>
+          </div>
+          <div class="summary-row">
+            <span>Email</span>
+            <strong id="account-email">-</strong>
+          </div>
+          <div class="summary-row">
+            <span>Role</span>
+            <strong id="account-role">-</strong>
+          </div>
+        </div>
+      </article>
+
+      <section class="panel-card security-card">
+        <div class="section-header">
+          <div>
+            <h3>Change Password</h3>
+            <p>Use your current password, then set a new one.</p>
+          </div>
+          <span class="section-badge">My account</span>
+        </div>
+        <p id="password-message" class="page-message" hidden></p>
+        <form id="change-password-form" class="form-grid">
+          <label>
+            Current Password
+            <input type="password" name="currentPassword" autocomplete="current-password" required>
+          </label>
+          <label>
+            New Password
+            <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required>
+          </label>
+          <label>
+            Confirm New Password
+            <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+          </label>
+          <div class="form-actions">
+            <button type="submit">Update Password</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section id="admin-panel" class="panel-card admin-panel" hidden>
+      <div class="section-header">
+        <div>
+          <h3>Team</h3>
+          <p>Add users, change roles, and reset passwords.</p>
+        </div>
+        <span class="section-badge">Admin</span>
+      </div>
+
+      <div class="admin-layout">
+        <section class="sub-panel">
+          <div class="section-header section-header--compact">
+            <div>
+              <h4>Add User</h4>
+              <p>New users get a temporary password.</p>
+            </div>
+          </div>
+          <p id="create-user-message" class="page-message" hidden></p>
+          <form id="create-user-form" class="form-grid">
+            <label>
+              Full Name
+              <input type="text" name="fullName" placeholder="e.g. Martha Phiri">
+            </label>
+            <label>
+              Username
+              <input type="text" name="username" placeholder="e.g. martha.phiri" required>
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" placeholder="e.g. martha@example.com" required>
+            </label>
+            <label>
+              Role
+              <select name="role" required>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+            <label class="field-span-full">
+              Temporary Password
+              <input type="password" name="password" minlength="8" placeholder="At least 8 characters" required>
+            </label>
+            <div class="form-actions">
+              <button type="submit">Create User</button>
+            </div>
+          </form>
+          <section id="credential-handoff" class="credential-handoff" hidden>
+            <div class="section-header section-header--compact">
+              <div>
+                <h4>Share Sign-In</h4>
+                <p>Send these temporary details.</p>
+              </div>
+              <span class="section-badge">Copy</span>
+            </div>
+            <div class="credential-handoff__grid">
+              <label>
+                Username
+                <input id="handoff-username" type="text" readonly>
+              </label>
+              <label>
+                Temporary Password
+                <input id="handoff-password" type="text" readonly>
+              </label>
+            </div>
+            <div class="credential-handoff__actions">
+              <button type="button" class="secondary-action" data-copy-target="username">Copy Username</button>
+              <button type="button" class="secondary-action" data-copy-target="password">Copy Password</button>
+              <button type="button" class="secondary-action secondary-action--accent" data-copy-target="both">Copy Both</button>
+            </div>
+            <p class="credential-handoff__note">
+              Ask the user to change this password after the first sign-in.
+            </p>
+            <p id="credential-copy-message" class="page-message" hidden></p>
+          </section>
+        </section>
+
+        <section class="sub-panel">
+          <div class="section-header section-header--compact">
+            <div>
+              <h4>Users</h4>
+              <p>Sort, filter, reset passwords, or change roles.</p>
+            </div>
+          </div>
+          <div class="users-toolbar" aria-label="User table controls">
+            <label class="users-toolbar__field users-toolbar__field--search">
+              <span>Search</span>
+              <input
+                type="search"
+                id="user-search"
+                placeholder="Search name, username, or email"
+                autocomplete="off"
+              >
+            </label>
+            <label class="users-toolbar__field">
+              <span>Role</span>
+              <select id="user-role-filter">
+                <option value="all">All roles</option>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+            <div class="users-toolbar__summary">
+              <span id="users-visible-count" class="section-badge">0 users</span>
+            </div>
+          </div>
+          <p id="user-list-message" class="page-message" hidden></p>
+          <div id="users-table-shell" class="table-shell users-table-shell">
+            <table class="users-table">
+              <colgroup>
+                <col class="users-table__col users-table__col--user">
+                <col class="users-table__col users-table__col--username">
+                <col class="users-table__col users-table__col--email">
+                <col class="users-table__col users-table__col--role">
+                <col class="users-table__col users-table__col--login">
+                <col class="users-table__col users-table__col--security">
+                <col class="users-table__col users-table__col--actions">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <button type="button" class="users-table__sort" data-sort-key="name">User</button>
+                  </th>
+                  <th scope="col">
+                    <button type="button" class="users-table__sort" data-sort-key="username">Username</button>
+                  </th>
+                  <th scope="col">
+                    <button type="button" class="users-table__sort" data-sort-key="email">Email</button>
+                  </th>
+                  <th scope="col">
+                    <button type="button" class="users-table__sort" data-sort-key="role">Role</button>
+                  </th>
+                  <th scope="col">
+                    <button type="button" class="users-table__sort" data-sort-key="lastLogin">Last Login</button>
+                  </th>
+                  <th scope="col">
+                    <button type="button" class="users-table__sort" data-sort-key="security">Security</button>
+                  </th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="user-list" class="user-list">
+                <!-- User rows injected by users.js -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/users.js"></script>
+</body>
+</html>

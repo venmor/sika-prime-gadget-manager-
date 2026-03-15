@@ -3,13 +3,13 @@
  * Provides functionality to record a sale and calculate profit.
  */
 
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 /**
  * Record a sale and calculate profit.
  *
- * The function calculates profit by subtracting the gadget's cost price
- * from the selling price. It also updates the gadget's status to 'sold'.
+ * The function calculates gain/loss by subtracting the gadget's recovery
+ * target from the selling price. It also updates the gadget's status to 'sold'.
  *
  * @param {Object} saleData - Fields describing the sale.
  * @param {number} saleData.gadgetId - ID of the gadget being sold.
@@ -20,23 +20,41 @@ const pool = require('../config/db');
  */
 async function create(saleData) {
   const { gadgetId, selling_price, sold_at, buyer_name = null } = saleData;
-  // Retrieve the gadget's cost price
-  const [rows] = await pool.query('SELECT cost_price FROM gadgets WHERE id = ?', [gadgetId]);
-  if (rows.length === 0) {
-    throw new Error('Gadget not found');
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.query(
+      'SELECT cost_price, status FROM gadgets WHERE id = ? FOR UPDATE',
+      [gadgetId]
+    );
+
+    if (rows.length === 0) {
+      throw new Error('Gadget not found');
+    }
+
+    if (rows[0].status === 'sold') {
+      throw new Error('Gadget has already been sold');
+    }
+
+    const recoveryTarget = rows[0].cost_price;
+    const profit = parseFloat(selling_price) - parseFloat(recoveryTarget);
+
+    const insertSql = `INSERT INTO sales (gadget_id, selling_price, sold_at, buyer_name, profit) VALUES (?, ?, ?, ?, ?)`;
+    const insertValues = [gadgetId, selling_price, sold_at, buyer_name, profit];
+    const [result] = await connection.query(insertSql, insertValues);
+
+    await connection.query('UPDATE gadgets SET status = ? WHERE id = ?', ['sold', gadgetId]);
+
+    await connection.commit();
+    return { saleId: result.insertId, profit };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
   }
-  const costPrice = rows[0].cost_price;
-  const profit = parseFloat(selling_price) - parseFloat(costPrice);
-
-  // Insert the sale record
-  const insertSql = `INSERT INTO sales (gadget_id, selling_price, sold_at, buyer_name, profit) VALUES (?, ?, ?, ?, ?)`;
-  const insertValues = [gadgetId, selling_price, sold_at, buyer_name, profit];
-  const [result] = await pool.query(insertSql, insertValues);
-
-  // Update gadget status to 'sold'
-  await pool.query('UPDATE gadgets SET status = ? WHERE id = ?', ['sold', gadgetId]);
-
-  return { saleId: result.insertId, profit };
 }
 
 module.exports = {

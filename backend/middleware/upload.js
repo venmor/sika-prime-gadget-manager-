@@ -7,13 +7,16 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
+
+const uploadPath = process.env.UPLOADS_DIR?.trim()
+  || path.resolve(__dirname, '..', '..', 'frontend', 'public', 'uploads');
+fs.mkdirSync(uploadPath, { recursive: true });
 
 // Define storage configuration for Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Resolve to the uploads folder within frontend/public
-    const uploadPath = path.resolve(__dirname, '..', '..', 'frontend', 'public', 'uploads');
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {

@@ -3,23 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sika Prime Gadget Manager – Login</title>
-  <link rel="stylesheet" href="/css/main.css">
+  <title>Sika Prime Gadget Manager - Login</title>
+  <link rel="stylesheet" href="/css/login.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
-<body>
-  <header>
-    <h1>Sika Prime Gadget Manager</h1>
-  </header>
-  <main>
-    <h2>Admin Login</h2>
-    <form id="login-form" style="max-width: 400px;">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required>
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required>
-      <button type="submit">Login</button>
-    </form>
-    <p id="login-error" style="color: #d9534f; margin-top: 1rem; display: none;"></p>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-showcase">
+      <div class="login-showcase__brand">
+        <div class="login-brand-panel">
+          <div class="login-brand-panel__mark">
+            <img src="/images/sika-prime-loans-logo.svg" alt="Sika Prime Loans" class="login-showcase__logo">
+          </div>
+          <div class="login-brand-panel__copy">
+            <strong class="login-brand-panel__name">Sika Prime Loans</strong>
+          </div>
+        </div>
+        <div class="login-showcase__headline">
+          <h1>Gadget Manager</h1>
+          <p>Stock, posters, and sales in one place.</p>
+        </div>
+      </div>
+
+      <p class="login-showcase__intro">
+        Sign in to manage devices and sales.
+      </p>
+
+      <div class="login-showcase__stats">
+        <article class="showcase-stat">
+          <strong>Inventory</strong>
+          <span>Track stock and pricing.</span>
+        </article>
+        <article class="showcase-stat">
+          <strong>Posters</strong>
+          <span>Download branded product posts.</span>
+        </article>
+        <article class="showcase-stat">
+          <strong>Sales</strong>
+          <span>Save sold items and results.</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="login-card">
+      <div class="login-card__header">
+        <span class="login-card__eyebrow">Sign In</span>
+        <h2>Welcome back</h2>
+        <p>Use your email or username.</p>
+      </div>
+
+      <p id="login-error" class="page-message page-message--error" hidden></p>
+
+      <form id="login-form" class="login-form">
+        <label class="login-field" for="identifier">
+          <span>Email or Username</span>
+          <input type="text" id="identifier" name="identifier" autocomplete="username" required>
+        </label>
+        <label class="login-field" for="password">
+          <span>Password</span>
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Sign In</button>
+      </form>
+
+      <div class="login-card__footer">
+        <span>Secure access</span>
+        <span>See an admin if you need a reset.</span>
+      </div>
+    </section>
   </main>
   <script src="/js/login.js"></script>
 </body>

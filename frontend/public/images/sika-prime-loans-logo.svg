@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="Sika Prime Loans logo">
+  <defs>
+    <linearGradient id="blueFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e4fa8" />
+      <stop offset="100%" stop-color="#123d88" />
+    </linearGradient>
+  </defs>
+  <rect x="34" y="34" width="152" height="152" rx="26" ry="26" transform="rotate(45 110 110)" fill="white" stroke="#e3277b" stroke-width="8" />
+  <rect x="48" y="48" width="124" height="124" rx="20" ry="20" transform="rotate(45 110 110)" fill="url(#blueFill)" />
+  <circle cx="110" cy="110" r="54" fill="none" stroke="white" stroke-width="10" />
+  <path d="M151 77c-17-7-34-2-44 8 23-2 38 14 38 34 0 11-5 21-14 29 17-4 30-21 30-39 0-12-4-24-10-32z" fill="white" opacity="0.9" />
+  <circle cx="110" cy="110" r="34" fill="none" stroke="white" stroke-width="8" />
+  <text x="110" y="123" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" fill="white">S</text>
+</svg>
