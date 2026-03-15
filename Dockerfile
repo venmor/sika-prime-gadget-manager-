@@ -14,4 +14,4 @@ WORKDIR /app/backend
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "scripts/start-service.sh"]

@@ -20,11 +20,41 @@ These files are now in the repo to support Railway deployment:
 - `Dockerfile`
 - `.dockerignore`
 - `railway.json`
+- `scripts/shared-preview.sh`
+- `scripts/shared-preview.ps1`
 
 The backend also now supports:
 
 - Railway-style MySQL env vars
 - configurable upload/session directories for mounted volumes
+- remote DB bootstrap through the helper scripts
+- optional auto-migration and auto-seed on service startup
+
+## 0. Generate the preview variables locally
+
+Before you open Railway, generate the paste-ready variables from this repo.
+
+Linux:
+
+```bash
+bash ./scripts/shared-preview.sh prepare
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\shared-preview.ps1 prepare
+```
+
+This creates two ignored local files:
+
+- `deploy/railway-preview.local.env`
+- `deploy/railway-preview.variables.txt`
+
+The second file contains the exact variable block to paste into Railway, including:
+
+- `AUTO_RUN_MIGRATIONS=true`
+- `AUTO_SEED_DEMO_DATA=true`
 
 ## 1. Push the current code to GitHub
 
@@ -80,19 +110,7 @@ ADMIN_PASSWORD_HASH=replace-with-a-bcrypt-hash
 
 If your MySQL service is not literally named `MySQL`, replace `MySQL` in those references with the actual Railway service name.
 
-Generate the password hash locally:
-
-```bash
-cd /home/charlie/sika-prime-gadget-manager/backend
-node -e "require('bcryptjs').hash('replace-with-admin-password', 10).then(console.log)"
-```
-
-Generate the session secret locally:
-
-```bash
-cd /home/charlie/sika-prime-gadget-manager/backend
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+If you used the preview helper in step 0, those values are already generated for you in `deploy/railway-preview.variables.txt`.
 
 ## 5. Optional but recommended: attach a volume
 
@@ -134,25 +152,46 @@ Your team can use:
 https://your-service-name.up.railway.app/login.html
 ```
 
-## 7. Run the database migrations
+## 7. Let the app initialize itself on first boot
 
-The app will not work until the tables exist.
+If you pasted the generated variable block from the preview helper, the Railway app will:
 
-Use the Railway MySQL service credentials plus its TCP proxy/public connection details, then run from your local machine:
+- run migrations on startup
+- seed the demo data on startup if the DB is empty
+
+That means this step is automatic for the first shared preview deploy.
+
+## 8. Optional fallback: bootstrap the database manually
+
+Use the helper script only if:
+
+- you want to reinitialize the shared DB manually
+- the first deploy missed the DB startup window
+- you want to reseed after changing the remote DB
+
+Linux:
 
 ```bash
-mariadb -h YOUR_TCP_PROXY_DOMAIN -P YOUR_TCP_PROXY_PORT -u YOUR_MYSQL_USER -p YOUR_MYSQL_DATABASE < database/migrations/create_tables.sql
-mariadb -h YOUR_TCP_PROXY_DOMAIN -P YOUR_TCP_PROXY_PORT -u YOUR_MYSQL_USER -p YOUR_MYSQL_DATABASE < database/migrations/20260314_add_list_price.sql
+bash ./scripts/shared-preview.sh bootstrap-db
 ```
 
-How to get those values:
+Windows PowerShell:
 
-- From the MySQL service `Variables` tab: `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`
-- From the MySQL service `Networking` or TCP Proxy settings: public proxy domain and port
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\shared-preview.ps1 bootstrap-db
+```
 
-If your database is brand new, the first migration is the important one. The second is only needed for older database states.
+The script will prompt for:
 
-## 8. Redeploy after variables and migrations
+- DB host
+- DB port
+- DB user
+- DB password
+- DB name
+
+Use the Railway MySQL TCP proxy or public connection values here.
+
+## 9. Redeploy after variables and startup settings
 
 In Railway:
 
@@ -161,7 +200,7 @@ In Railway:
 
 Or push a new commit to GitHub and Railway will redeploy automatically.
 
-## 9. Verify the preview
+## 10. Verify the preview
 
 Check:
 
@@ -177,8 +216,14 @@ Expected:
 - `/api/health/db` returns `database: connected`
 - login page loads
 
-## 10. Notes for your team preview
+## 11. Notes for your team preview
 
 - This is a good temporary test URL before buying a domain.
 - The app is already set up to work behind Railway's HTTPS domain.
 - Once you buy a real domain later, you can attach it in Railway without reworking the app.
+- The only manual intervention left is inside Railway itself:
+  - connect the GitHub repo
+  - create the MySQL service
+  - add a volume
+  - paste the generated variables
+  - generate the public domain
