@@ -2,8 +2,13 @@ FROM mcr.microsoft.com/playwright:v1.52.0-noble
 
 WORKDIR /app
 
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 COPY backend/package*.json ./backend/
-RUN cd backend && npm ci --omit=dev
+RUN mkdir -p /ms-playwright \
+  && cd backend \
+  && npm ci --omit=dev \
+  && npx playwright install chromium
 
 COPY backend ./backend
 COPY frontend ./frontend
