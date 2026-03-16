@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sika Prime Gadget Manager - Users</title>
+  <script src="/js/theme.js"></script>
   <link rel="stylesheet" href="/css/users.css">
   <link rel="stylesheet" href="/css/theme.css">
 </head>
@@ -105,6 +106,27 @@
           </div>
         </form>
       </section>
+
+      <article class="panel-card appearance-card">
+        <div class="section-header">
+          <div>
+            <h3>Appearance</h3>
+            <p>Choose the color theme used on this device.</p>
+          </div>
+          <span class="section-badge">Theme</span>
+        </div>
+        <div class="theme-setting">
+          <p class="theme-setting__description">
+            Dark mode uses Sika Prime blue and pink accents with softer contrast for longer sessions.
+          </p>
+          <div class="theme-toggle-group" role="group" aria-label="Choose color theme">
+            <button type="button" class="theme-toggle-option" data-theme-choice="light">Light</button>
+            <button type="button" class="theme-toggle-option" data-theme-choice="dark">Dark</button>
+            <button type="button" class="theme-toggle-option" data-theme-choice="system">System</button>
+          </div>
+          <p class="theme-setting__status" data-theme-status>Following your device setting.</p>
+        </div>
+      </article>
     </section>
 
     <section id="admin-panel" class="panel-card admin-panel" hidden>
