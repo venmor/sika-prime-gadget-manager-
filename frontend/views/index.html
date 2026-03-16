@@ -84,33 +84,38 @@
         </div>
         <span class="section-badge">Filters</span>
       </div>
-      <div class="inventory-toolbar">
-        <label class="filter-field">
-          <span>Search</span>
-          <input type="text" id="search" placeholder="Search by name, brand, or model">
-        </label>
-        <label class="filter-field">
-          <span>Type</span>
-          <select id="filter-type">
-            <option value="">All Types</option>
-            <option value="laptop">Laptops</option>
-            <option value="phone">Phones</option>
-            <option value="other">Other Devices</option>
-          </select>
-        </label>
-        <label class="filter-field">
-          <span>Status</span>
-          <select id="filter-status">
-            <option value="">All Status</option>
-            <option value="available">Available</option>
-            <option value="sold">Sold</option>
-          </select>
-        </label>
-        <div class="filter-actions">
-          <button id="filter-btn">Apply filters</button>
-          <a class="button-link secondary" href="/add-gadget.html">Add gadget</a>
+      <details class="mobile-filter-drawer" data-mobile-collapsible open>
+        <summary class="mobile-filter-drawer__toggle">Filters</summary>
+        <div class="mobile-filter-drawer__body">
+          <div class="inventory-toolbar">
+            <label class="filter-field">
+              <span>Search</span>
+              <input type="text" id="search" placeholder="Search by name, brand, or model">
+            </label>
+            <label class="filter-field">
+              <span>Type</span>
+              <select id="filter-type">
+                <option value="">All Types</option>
+                <option value="laptop">Laptops</option>
+                <option value="phone">Phones</option>
+                <option value="other">Other Devices</option>
+              </select>
+            </label>
+            <label class="filter-field">
+              <span>Status</span>
+              <select id="filter-status">
+                <option value="">All Status</option>
+                <option value="available">Available</option>
+                <option value="sold">Sold</option>
+              </select>
+            </label>
+            <div class="filter-actions">
+              <button id="filter-btn">Apply filters</button>
+              <a class="button-link secondary" href="/add-gadget.html">Add gadget</a>
+            </div>
+          </div>
         </div>
-      </div>
+      </details>
     </section>
 
     <section class="section-card section-card--inventory">

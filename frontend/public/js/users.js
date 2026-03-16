@@ -243,25 +243,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     return `
       <tr class="user-row${isCurrentUser ? ' user-row--current' : ''}">
-        <td>
+        <td data-label="User">
           <div class="user-row__identity">
             <strong class="user-row__name">${escapeHtml(displayName)}</strong>
             <span class="user-row__meta">${escapeHtml(isCurrentUser ? 'Current user' : 'Team member')}</span>
           </div>
         </td>
-        <td class="user-row__cell">${escapeHtml(user.username || '-')}</td>
-        <td class="user-row__cell">${escapeHtml(user.email || 'No email assigned')}</td>
-        <td>
+        <td class="user-row__cell" data-label="Username">${escapeHtml(user.username || '-')}</td>
+        <td class="user-row__cell" data-label="Email">${escapeHtml(user.email || 'No email assigned')}</td>
+        <td data-label="Role">
           <div class="${roleClass}">${escapeHtml(formatRole(user.role))}</div>
         </td>
-        <td class="user-row__cell">${escapeHtml(formatDate(user.lastLoginAt))}</td>
-        <td>
+        <td class="user-row__cell" data-label="Last Login">${escapeHtml(formatDate(user.lastLoginAt))}</td>
+        <td data-label="Security">
           <div class="user-row__security">
             <strong>${escapeHtml(resetHint)}</strong>
             <span>${escapeHtml(user.mustChangePassword ? 'User will update after login.' : 'No reset pending.')}</span>
           </div>
         </td>
-        <td>
+        <td data-label="Actions">
           <div class="user-row__actions">
             <div class="user-row__action-bar">
               <button

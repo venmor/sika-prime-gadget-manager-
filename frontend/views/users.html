@@ -117,7 +117,7 @@
       </div>
 
       <div class="admin-layout">
-        <section class="sub-panel">
+        <section class="sub-panel admin-layout__panel admin-layout__panel--create">
           <div class="section-header section-header--compact">
             <div>
               <h4>Add User</h4>
@@ -183,36 +183,42 @@
           </section>
         </section>
 
-        <section class="sub-panel">
+        <section class="sub-panel admin-layout__panel admin-layout__panel--list">
           <div class="section-header section-header--compact">
             <div>
               <h4>Users</h4>
               <p>Sort, filter, reset passwords, or change roles.</p>
             </div>
           </div>
-          <div class="users-toolbar" aria-label="User table controls">
-            <label class="users-toolbar__field users-toolbar__field--search">
-              <span>Search</span>
-              <input
-                type="search"
-                id="user-search"
-                placeholder="Search name, username, or email"
-                autocomplete="off"
-              >
-            </label>
-            <label class="users-toolbar__field">
-              <span>Role</span>
-              <select id="user-role-filter">
-                <option value="all">All roles</option>
-                <option value="staff">Staff</option>
-                <option value="admin">Admin</option>
-              </select>
-            </label>
-            <div class="users-toolbar__summary">
-              <span id="users-visible-count" class="section-badge">0 users</span>
+          <details class="mobile-filter-drawer" data-mobile-collapsible open>
+            <summary class="mobile-filter-drawer__toggle">Search and Filter</summary>
+            <div class="mobile-filter-drawer__body">
+              <div class="users-toolbar" aria-label="User table controls">
+                <label class="users-toolbar__field users-toolbar__field--search">
+                  <span>Search</span>
+                  <input
+                    type="search"
+                    id="user-search"
+                    placeholder="Search name, username, or email"
+                    autocomplete="off"
+                  >
+                </label>
+                <label class="users-toolbar__field">
+                  <span>Role</span>
+                  <select id="user-role-filter">
+                    <option value="all">All roles</option>
+                    <option value="staff">Staff</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </label>
+                <div class="users-toolbar__summary">
+                  <span id="users-visible-count" class="section-badge">0 users</span>
+                </div>
+              </div>
             </div>
-          </div>
+          </details>
           <p id="user-list-message" class="page-message" hidden></p>
+          <p class="table-hint">Swipe to see more columns.</p>
           <div id="users-table-shell" class="table-shell users-table-shell">
             <table class="users-table">
               <colgroup>

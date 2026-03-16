@@ -212,27 +212,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return `
       <tr class="${isDeleted ? 'table-row--deleted' : ''}">
-        <td>${index + 1}</td>
-        <td>
+        <td data-label="No.">${index + 1}</td>
+        <td data-label="Gadget">
           <div class="cell-stack">
             <strong>${escapeHtml(displayName)}</strong>
             <span>${escapeHtml(typeLabel)}</span>
           </div>
         </td>
-        <td>
+        <td data-label="Buyer">
           <div class="cell-stack">
             <strong>${buyerName}</strong>
             <small>Sale #${escapeHtml(String(sale.id ?? index + 1))}</small>
           </div>
         </td>
-        <td class="numeric-cell">${escapeHtml(formatCurrency(recoveryTarget))}</td>
-        <td class="numeric-cell">${escapeHtml(formatCurrency(sellingPrice))}</td>
-        <td class="${profitClass}">${escapeHtml(formatCurrency(profit))}</td>
-        <td>
+        <td class="numeric-cell" data-label="Recovery">${escapeHtml(formatCurrency(recoveryTarget))}</td>
+        <td class="numeric-cell" data-label="Sale">${escapeHtml(formatCurrency(sellingPrice))}</td>
+        <td class="${profitClass}" data-label="Profit / Loss">${escapeHtml(formatCurrency(profit))}</td>
+        <td data-label="Status">
           ${statusBadge}
           ${statusNote}
         </td>
-        <td class="date-cell">${escapeHtml(formatDate(sale.sold_at))}</td>
+        <td class="date-cell" data-label="Date Sold">${escapeHtml(formatDate(sale.sold_at))}</td>
       </tr>
     `;
   }
@@ -247,22 +247,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return `
       <tr class="table-row--deleted">
-        <td>${index + 1}</td>
-        <td>
+        <td data-label="No.">${index + 1}</td>
+        <td data-label="Gadget">
           <div class="cell-stack">
             <strong>${escapeHtml(displayName)}</strong>
             <span>${escapeHtml(item.name || 'Inventory record')}</span>
           </div>
         </td>
-        <td>${escapeHtml(formatLabel(item.type))}</td>
-        <td>
+        <td data-label="Type">${escapeHtml(formatLabel(item.type))}</td>
+        <td data-label="Status">
           <span class="status-pill status-pill--deleted">${escapeHtml(statusLabel)}</span>
           <small class="audit-note">${escapeHtml(statusNote)}</small>
         </td>
-        <td class="numeric-cell">${escapeHtml(formatCurrency(recoveryTarget))}</td>
-        <td>${escapeHtml(item.deleted_by || 'Unknown user')}</td>
-        <td class="date-cell">${escapeHtml(formatDate(item.deleted_at))}</td>
-        <td>
+        <td class="numeric-cell" data-label="Recovery">${escapeHtml(formatCurrency(recoveryTarget))}</td>
+        <td data-label="Deleted By">${escapeHtml(item.deleted_by || 'Unknown user')}</td>
+        <td class="date-cell" data-label="Deleted At">${escapeHtml(formatDate(item.deleted_at))}</td>
+        <td data-label="Action">
           <button
             type="button"
             class="table-action table-action--restore"

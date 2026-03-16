@@ -14,14 +14,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewCard = document.getElementById('ad-card-preview');
   const previewSection = document.getElementById('ad-preview-section');
   const generateBtn = document.getElementById('generate-ad');
+  const mobileGenerateBtn = document.getElementById('mobile-generate-ad');
   const messageEl = document.getElementById('detail-message');
   const extraTextInput = document.getElementById('ad-extra-text');
 
   // Elements for sale functionality
   const saleForm = document.getElementById('sale-form');
   const saleInfo = document.getElementById('sale-info');
+  const mobileSaveSaleBtn = document.getElementById('mobile-save-sale');
   let currentGadget = null;
   const processedImageCache = new Map();
+  const desktopExportLabel = generateBtn?.textContent || 'Export Ad PNG';
+  const mobileExportLabel = mobileGenerateBtn?.textContent || 'Export Ad';
+  const exportButtons = [generateBtn, mobileGenerateBtn].filter(Boolean);
+
+  function setPreviewOpenState(isOpen) {
+    document.body.classList.toggle('detail-preview-open', Boolean(isOpen));
+  }
+
+  function setExportButtonState({ disabled, state = 'idle' } = {}) {
+    exportButtons.forEach((button) => {
+      if (typeof disabled === 'boolean') {
+        button.disabled = disabled;
+      }
+
+      if (state === 'preparing') {
+        button.textContent = 'Preparing...';
+      } else if (state === 'exporting') {
+        button.textContent = 'Exporting...';
+      } else if (button === generateBtn) {
+        button.textContent = desktopExportLabel;
+      } else {
+        button.textContent = mobileExportLabel;
+      }
+    });
+  }
+
+  function syncSaleButton({ sold = false } = {}) {
+    if (!mobileSaveSaleBtn) {
+      return;
+    }
+
+    const disabled = sold || !saleForm;
+    mobileSaveSaleBtn.hidden = disabled;
+    mobileSaveSaleBtn.disabled = disabled;
+  }
+
+  if (previewSection) {
+    setPreviewOpenState(previewSection.open);
+    previewSection.addEventListener('toggle', () => {
+      setPreviewOpenState(previewSection.open);
+    });
+  }
+
+  setExportButtonState({ disabled: true });
+  syncSaleButton({ sold: true });
 
   function createCanvas(width, height) {
     const canvas = document.createElement('canvas');
@@ -320,7 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!gadgetId) {
     detailSection.textContent = 'Pick a gadget.';
-    generateBtn.disabled = true;
+    setExportButtonState({ disabled: true });
+    syncSaleButton({ sold: true });
     return;
   }
 
@@ -353,7 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (err.message === 'Unauthorized') return;
       console.error(err);
       detailSection.textContent = 'Could not load gadget.';
-      generateBtn.disabled = true;
+      setExportButtonState({ disabled: true });
+      syncSaleButton({ sold: true });
       showMessage('Could not load gadget.', 'error');
     }
   }
@@ -447,9 +496,9 @@ document.addEventListener('DOMContentLoaded', () => {
     hero.appendChild(summary);
     shell.appendChild(hero);
 
-    if (gadget.status && gadget.status.toLowerCase() === 'sold') {
-      generateBtn.disabled = true;
-    }
+    const isSold = Boolean(gadget.status && gadget.status.toLowerCase() === 'sold');
+    setExportButtonState({ disabled: isSold });
+    syncSaleButton({ sold: isSold });
 
     const infoGrid = document.createElement('div');
     infoGrid.className = 'gadget-detail__info-grid';
@@ -542,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
     // If the gadget is already sold, hide the sale form and display a notice
-    if (gadget.status && gadget.status.toLowerCase() === 'sold') {
+    if (isSold) {
       if (saleForm) saleForm.style.display = 'none';
       if (saleInfo) {
         saleInfo.style.display = 'block';
@@ -570,8 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
     previewCard.style.display = 'block';
   }
 
-  // Listen for the generate button click to create the PNG and download it
-  generateBtn.addEventListener('click', async () => {
+  async function handleAdExport() {
     if (!currentGadget || !currentGadget.id) {
       showMessage('Load a gadget before exporting the ad.', 'error');
       return;
@@ -581,16 +629,14 @@ document.addEventListener('DOMContentLoaded', () => {
       previewSection.open = true;
     }
 
-    const originalLabel = generateBtn.textContent;
-    generateBtn.disabled = true;
-    generateBtn.textContent = 'Preparing...';
+    setExportButtonState({ disabled: true, state: 'preparing' });
 
     try {
       clearMessage();
       buildAdCard(currentGadget);
       const processedImageDataUrl = await prepareAdImage(currentGadget);
       buildAdCard(currentGadget);
-      generateBtn.textContent = 'Exporting...';
+      setExportButtonState({ disabled: true, state: 'exporting' });
       const response = await fetchWithAuth('/api/ads/export', {
         method: 'POST',
         headers: {
@@ -649,10 +695,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       showMessage(err.message || 'Failed to export advertisement card.', 'error');
     } finally {
-      generateBtn.textContent = originalLabel;
-      generateBtn.disabled = Boolean(currentGadget?.status && currentGadget.status.toLowerCase() === 'sold');
+      setExportButtonState({
+        disabled: Boolean(currentGadget?.status && currentGadget.status.toLowerCase() === 'sold')
+      });
     }
-  });
+  }
+
+  if (generateBtn) {
+    generateBtn.addEventListener('click', handleAdExport);
+  }
+
+  if (mobileGenerateBtn) {
+    mobileGenerateBtn.addEventListener('click', handleAdExport);
+  }
 
   // Handle sale form submission
   if (saleForm) {
@@ -698,7 +753,11 @@ document.addEventListener('DOMContentLoaded', () => {
           statusEl.textContent = 'Sold';
           statusEl.className = 'status-pill status-pill--sold';
         }
-        generateBtn.disabled = true;
+        if (currentGadget) {
+          currentGadget.status = 'sold';
+        }
+        setExportButtonState({ disabled: true });
+        syncSaleButton({ sold: true });
         showMessage('Sale saved.', 'success');
       } catch (err) {
         if (err.message === 'Unauthorized') return;
