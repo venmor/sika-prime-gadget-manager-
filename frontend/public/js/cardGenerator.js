@@ -8,8 +8,15 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const { fetchWithAuth } = window.appAuth;
+  const { fetchWithAuth } = window.appAuth || {};
+  const { createMessenger, formatLabel } = window.SikaPrimeAppUtils || {};
   const { renderAdCard } = window.SikaPrimeAdCard;
+
+  if (!fetchWithAuth || !createMessenger || !formatLabel || !renderAdCard) {
+    console.error('Shared app helpers are not available on the gadget detail page.');
+    return;
+  }
+
   const detailSection = document.getElementById('gadget-details');
   const previewCard = document.getElementById('ad-card-preview');
   const previewSection = document.getElementById('ad-preview-section');
@@ -26,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileSaveSaleBtn = document.getElementById('mobile-save-sale');
   let currentGadget = null;
   const processedImageCache = new Map();
+  const message = createMessenger(messageEl);
   const desktopExportLabel = generateBtn?.textContent || 'Export Poster PNG';
   const previewExportLabel = previewGenerateBtn?.textContent || 'Export Poster PNG';
   const mobileExportLabel = mobileGenerateBtn?.textContent || 'Export Poster';
@@ -372,18 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
       : gadget;
   }
 
-  function showMessage(message, variant = 'info') {
-    messageEl.textContent = message;
-    messageEl.className = `page-message page-message--${variant}`;
-    messageEl.hidden = false;
-  }
-
-  function clearMessage() {
-    messageEl.hidden = true;
-    messageEl.textContent = '';
-    messageEl.className = 'page-message';
-  }
-
   // Parse the ID from the query string
   const params = new URLSearchParams(window.location.search);
   const gadgetId = params.get('id');
@@ -414,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function fetchGadget(id) {
     try {
-      clearMessage();
+      message.clear();
       const response = await fetchWithAuth(`/api/gadgets/${id}`);
       if (!response.ok) throw new Error('Failed to fetch gadget details');
       const gadget = await response.json();
@@ -426,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
       detailSection.textContent = 'Could not load gadget.';
       setExportButtonState({ disabled: true });
       syncSaleButton({ sold: true });
-      showMessage('Could not load gadget.', 'error');
+      message.show('Could not load gadget.', 'error');
     }
   }
 
@@ -449,10 +445,10 @@ document.addEventListener('DOMContentLoaded', () => {
     metrics.className = 'metric-inline';
     const typeChip = document.createElement('span');
     typeChip.className = 'metric-chip';
-    typeChip.textContent = `Type: ${formatLabel(gadget.type)}`;
+    typeChip.textContent = `Type: ${formatLabel(gadget.type, { fallback: 'Not provided' })}`;
     const statusChip = document.createElement('span');
     statusChip.className = `status-pill ${gadget.status === 'sold' ? 'status-pill--sold' : 'status-pill--available'}`;
-    statusChip.textContent = formatLabel(gadget.status);
+    statusChip.textContent = formatLabel(gadget.status, { fallback: 'Not provided' });
     metrics.appendChild(typeChip);
     metrics.appendChild(statusChip);
     shell.appendChild(metrics);
@@ -485,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const subline = document.createElement('p');
     subline.className = 'gadget-detail__subline';
-    subline.textContent = [gadget.brand, gadget.model].filter(Boolean).join(' / ') || `Type: ${formatLabel(gadget.type)}`;
+    subline.textContent = [gadget.brand, gadget.model].filter(Boolean).join(' / ') || `Type: ${formatLabel(gadget.type, { fallback: 'Not provided' })}`;
     summary.appendChild(subline);
 
     let priceValue = 'Price on request';
@@ -501,11 +497,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const overview = document.createElement('div');
     overview.className = 'gadget-detail__overview';
     [
-      { label: 'Category', value: formatLabel(gadget.type) },
+      { label: 'Category', value: formatLabel(gadget.type, { fallback: 'Not provided' }) },
       { label: 'Brand', value: gadget.brand || 'Not provided' },
       { label: 'Model', value: gadget.model || gadget.name || 'Not provided' },
       { label: 'Recovery', value: recoveryValue },
-      { label: 'Status', value: formatLabel(gadget.status || 'available') },
+      { label: 'Status', value: formatLabel(gadget.status || 'available', { fallback: 'Not provided' }) },
       { label: 'Price', value: priceValue, accent: true }
     ].forEach((item) => {
       const stat = createDetailStat(item.label, item.value);
@@ -594,11 +590,6 @@ document.addEventListener('DOMContentLoaded', () => {
       specsList.appendChild(li);
     }
 
-    function formatLabel(value) {
-      if (!value) return 'Not provided';
-      return String(value).replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-    }
-
     // Build the advertisement card preview
     buildAdCard(gadget);
     prepareAdImage(gadget)
@@ -620,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saleInfo.style.display = 'block';
         saleInfo.textContent = 'This gadget is already sold.';
       }
-      showMessage('This gadget is already sold.', 'info');
+      message.show('This gadget is already sold.', 'info');
     }
   }
 
@@ -644,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function handleAdExport() {
     if (!currentGadget || !currentGadget.id) {
-      showMessage('Load a gadget before exporting the ad.', 'error');
+      message.show('Load a gadget before exporting the ad.', 'error');
       return;
     }
 
@@ -655,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setExportButtonState({ disabled: true, state: 'preparing' });
 
     try {
-      clearMessage();
+      message.clear();
       buildAdCard(currentGadget);
       const processedImageDataUrl = await prepareAdImage(currentGadget);
       buildAdCard(currentGadget);
@@ -713,10 +704,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (err.message === 'Unauthorized') return;
       console.error(err);
       if (err instanceof TypeError) {
-        showMessage('Backend unavailable. Restart the server and try exporting again.', 'error');
+        message.show('Backend unavailable. Restart the server and try exporting again.', 'error');
         return;
       }
-      showMessage(err.message || 'Failed to export advertisement card.', 'error');
+      message.show(err.message || 'Failed to export advertisement card.', 'error');
     } finally {
       setExportButtonState({
         disabled: Boolean(currentGadget?.status && currentGadget.status.toLowerCase() === 'sold')
@@ -745,11 +736,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const buyerName = saleForm.querySelector('[name="buyer_name"]').value;
       const saleDate = saleForm.querySelector('[name="sale_date"]').value;
       if (!sellingPrice || !saleDate) {
-        showMessage('Enter a sale price and date.', 'error');
+        message.show('Enter a sale price and date.', 'error');
         return;
       }
       try {
-        clearMessage();
+        message.clear();
         const payload = {
           gadgetId: parseInt(gadgetId, 10),
           selling_price: parseFloat(sellingPrice),
@@ -785,11 +776,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setExportButtonState({ disabled: true });
         syncSaleButton({ sold: true });
-        showMessage('Sale saved.', 'success');
+        message.show('Sale saved.', 'success');
       } catch (err) {
         if (err.message === 'Unauthorized') return;
         console.error(err);
-        showMessage(err.message, 'error');
+        message.show(err.message, 'error');
       }
     });
   }

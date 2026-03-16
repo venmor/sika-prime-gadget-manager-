@@ -8,7 +8,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const { fetchWithAuth } = window.appAuth;
+  const { fetchWithAuth } = window.appAuth || {};
+  const { createMessenger, formatCurrency } = window.SikaPrimeAppUtils || {};
+
+  if (!fetchWithAuth || !createMessenger || !formatCurrency) {
+    console.error('Shared app helpers are not available on the add gadget page.');
+    return;
+  }
+
   const form = document.getElementById('gadget-form');
   const typeSelector = document.getElementById('type-selector');
   const specContainer = document.getElementById('spec-container');
@@ -22,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const summaryVarianceLabel = document.getElementById('summary-variance-label');
   const summaryNote = document.getElementById('summary-note');
   const defaultSubmitLabel = submitButton.textContent;
+  const message = createMessenger(messageEl);
 
   const TYPE_CONFIG = {
     laptop: {
@@ -109,37 +117,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const editId = params.get('id');
 
-  function showMessage(message, variant = 'info') {
-    messageEl.textContent = message;
-    messageEl.className = `page-message page-message--${variant}`;
-    messageEl.hidden = false;
-  }
-
-  function clearMessage() {
-    messageEl.hidden = true;
-    messageEl.textContent = '';
-    messageEl.className = 'page-message';
-  }
-
-  function formatCurrency(value) {
-    const parsed = Number.parseFloat(value);
-    return Number.isFinite(parsed) ? `K${parsed.toFixed(2)}` : 'K0.00';
-  }
-
   function updateSummary() {
     const recovery = Number.parseFloat(recoveryInput.value);
     const plannedPrice = Number.parseFloat(plannedPriceInput.value);
     const hasRecovery = Number.isFinite(recovery);
     const hasPlannedPrice = Number.isFinite(plannedPrice);
 
-    summaryRecovery.textContent = hasRecovery ? `K${recovery.toFixed(2)}` : 'K0.00';
-    summaryListPrice.textContent = hasPlannedPrice ? `K${plannedPrice.toFixed(2)}` : 'K0.00';
+    summaryRecovery.textContent = hasRecovery ? formatCurrency(recovery) : 'K0.00';
+    summaryListPrice.textContent = hasPlannedPrice ? formatCurrency(plannedPrice) : 'K0.00';
 
     if (hasRecovery && hasPlannedPrice) {
       const variance = plannedPrice - recovery;
       const label = variance >= 0 ? 'Expected gain' : 'Expected shortfall';
       summaryVarianceLabel.textContent = label;
-      summaryVariance.textContent = `${variance < 0 ? '-' : ''}K${Math.abs(variance).toFixed(2)}`;
+      summaryVariance.textContent = `${variance < 0 ? '-' : ''}${formatCurrency(Math.abs(variance))}`;
       summaryNote.textContent = 'Final profit or loss is set when the sale is saved.';
       return;
     }
@@ -217,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function prefillForm(id) {
     try {
-      clearMessage();
+      message.clear();
       const response = await fetchWithAuth(`/api/gadgets/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch gadget');
@@ -240,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       console.error(err);
-      showMessage('Unable to load this gadget for editing.', 'error');
+      message.show('Unable to load this gadget for editing.', 'error');
     }
   }
 
@@ -263,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(form);
     submitButton.disabled = true;
     submitButton.textContent = 'Saving...';
-    clearMessage();
+    message.clear();
 
     try {
       const url = editId ? `/api/gadgets/${editId}` : '/api/gadgets';
@@ -279,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       await response.json();
-      showMessage(editId ? 'Changes saved.' : 'Gadget saved.', 'success');
+      message.show(editId ? 'Changes saved.' : 'Gadget saved.', 'success');
       setTimeout(() => {
         window.location.href = '/index.html';
       }, 500);
@@ -289,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       console.error(err);
-      showMessage(err.message, 'error');
+      message.show(err.message, 'error');
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = defaultSubmitLabel;

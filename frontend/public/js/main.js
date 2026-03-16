@@ -7,7 +7,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const { fetchWithAuth } = window.appAuth;
+  const { fetchWithAuth } = window.appAuth || {};
+  const { createMessenger, formatCurrency, formatLabel } = window.SikaPrimeAppUtils || {};
+
+  if (!fetchWithAuth || !createMessenger || !formatCurrency || !formatLabel) {
+    console.error('Shared app helpers are not available on the inventory page.');
+    return;
+  }
+
   const listContainer = document.getElementById('gadget-list');
   const messageEl = document.getElementById('inventory-message');
   const statTotal = document.getElementById('stat-total');
@@ -21,29 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterType = document.getElementById('filter-type');
   const filterStatus = document.getElementById('filter-status');
   const filterBtn = document.getElementById('filter-btn');
-
-  function formatLabel(value) {
-    return String(value || '')
-      .replace(/[_-]+/g, ' ')
-      .replace(/\b\w/g, (character) => character.toUpperCase());
-  }
-
-  function formatCurrency(value, fallback = 'No price') {
-    const parsed = Number.parseFloat(value);
-    return Number.isFinite(parsed) ? `K${parsed.toFixed(2)}` : fallback;
-  }
-
-  function showMessage(message, variant = 'info') {
-    messageEl.textContent = message;
-    messageEl.className = `page-message page-message--${variant}`;
-    messageEl.hidden = false;
-  }
-
-  function clearMessage() {
-    messageEl.hidden = true;
-    messageEl.textContent = '';
-    messageEl.className = 'page-message';
-  }
+  const message = createMessenger(messageEl);
 
   function updateStats(gadgets) {
     const total = gadgets.length;
@@ -73,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function fetchGadgets() {
     try {
-      clearMessage();
+      message.clear();
       const params = new URLSearchParams();
       if (filterType.value) params.append('type', filterType.value);
       if (filterStatus.value) params.append('status', filterStatus.value);
@@ -87,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       if (err.message === 'Unauthorized') return;
       console.error(err);
-      showMessage('Unable to load gadgets right now.', 'error');
+      message.show('Unable to load gadgets right now.', 'error');
     }
   }
 
@@ -149,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const priceBadge = document.createElement('span');
       priceBadge.className = 'card__price';
       const hasListPrice = Number.isFinite(Number.parseFloat(gadget.list_price));
-      priceBadge.textContent = formatCurrency(gadget.list_price, 'On request');
+      priceBadge.textContent = formatCurrency(gadget.list_price, { fallback: 'On request' });
       if (!hasListPrice) {
         priceBadge.classList.add('card__price--muted');
       }
@@ -176,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
       meta.appendChild(typeRow);
       const costRow = document.createElement('div');
       costRow.className = 'card__meta-row';
-      costRow.innerHTML = `<span>Recovery</span><strong>${formatCurrency(gadget.cost_price, 'Not set')}</strong>`;
+      costRow.innerHTML = `<span>Recovery</span><strong>${formatCurrency(gadget.cost_price, { fallback: 'Not set' })}</strong>`;
       meta.appendChild(costRow);
       content.appendChild(meta);
       card.appendChild(content);
@@ -205,12 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const resp = await fetchWithAuth(`/api/gadgets/${gadget.id}`, { method: 'DELETE' });
             if (!resp.ok) throw new Error('Delete failed');
             // Reload list after deletion
-            showMessage('Gadget deleted.', 'success');
+            message.show('Gadget deleted.', 'success');
             fetchGadgets();
           } catch (err) {
             if (err.message === 'Unauthorized') return;
             console.error(err);
-            showMessage('Could not delete gadget.', 'error');
+            message.show('Could not delete gadget.', 'error');
           }
         }
       });

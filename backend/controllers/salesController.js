@@ -4,6 +4,7 @@
 
 const Sale = require('../models/Sale');
 const { pool } = require('../config/db');
+const { sendErrorResponse } = require('../utils/controllerHelpers');
 
 /**
  * POST /api/sales
@@ -30,14 +31,15 @@ async function recordSale(req, res) {
     const { saleId, profit } = await Sale.create(saleData);
     res.status(201).json({ saleId, profit });
   } catch (error) {
-    console.error(error);
     if (error.message === 'Gadget not found') {
-      return res.status(404).json({ error: error.message });
+      error.statusCode = 404;
+      return sendErrorResponse(res, error, 'Failed to record sale');
     }
     if (error.message === 'Gadget has already been sold') {
-      return res.status(409).json({ error: error.message });
+      error.statusCode = 409;
+      return sendErrorResponse(res, error, 'Failed to record sale');
     }
-    res.status(500).json({ error: 'Failed to record sale' });
+    return sendErrorResponse(res, error, 'Failed to record sale');
   }
 }
 
@@ -64,8 +66,7 @@ async function getSalesReport(req, res) {
     const [rows] = await pool.query(sql);
     res.json(rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch sales report' });
+    sendErrorResponse(res, error, 'Failed to fetch sales report');
   }
 }
 

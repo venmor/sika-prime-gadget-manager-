@@ -6,6 +6,34 @@
     ? window.matchMedia('(prefers-color-scheme: dark)')
     : null;
 
+  function createQuickToggle({ className, target }) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = className;
+    button.dataset.themeToggle = target;
+    return button;
+  }
+
+  function ensureQuickToggles() {
+    const nav = document.querySelector('body > header nav');
+
+    if (nav && !nav.querySelector('[data-theme-toggle="nav"]')) {
+      nav.append(createQuickToggle({
+        className: 'theme-quick-toggle theme-quick-toggle--nav',
+        target: 'nav'
+      }));
+    }
+
+    const loginHeader = document.querySelector('.login-card__header');
+
+    if (loginHeader && !loginHeader.querySelector('[data-theme-toggle="login"]')) {
+      loginHeader.append(createQuickToggle({
+        className: 'theme-quick-toggle theme-quick-toggle--login',
+        target: 'login'
+      }));
+    }
+  }
+
   function getStoredPreference() {
     try {
       const value = window.localStorage.getItem(STORAGE_KEY);
@@ -47,9 +75,18 @@
     return `${preference.charAt(0).toUpperCase()}${preference.slice(1)} mode is active on this device.`;
   }
 
+  function getQuickToggleTarget(resolvedTheme) {
+    return resolvedTheme === 'dark' ? 'light' : 'dark';
+  }
+
+  function formatQuickToggleLabel(nextTheme) {
+    return nextTheme === 'dark' ? 'Use dark' : 'Use light';
+  }
+
   function syncControls() {
     const preference = root.dataset.themePreference || getStoredPreference();
     const resolvedTheme = root.dataset.theme || getResolvedTheme(preference);
+    const quickToggleTarget = getQuickToggleTarget(resolvedTheme);
 
     document.querySelectorAll('[data-theme-choice]').forEach((button) => {
       const isActive = button.dataset.themeChoice === preference;
@@ -59,6 +96,17 @@
 
     document.querySelectorAll('[data-theme-status]').forEach((node) => {
       node.textContent = formatStatus(preference, resolvedTheme);
+    });
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      button.dataset.nextTheme = quickToggleTarget;
+      button.textContent = formatQuickToggleLabel(quickToggleTarget);
+      button.setAttribute('aria-label', `Switch to ${quickToggleTarget} mode`);
+      button.setAttribute('title', `Switch to ${quickToggleTarget} mode`);
+      button.style.setProperty(
+        '--theme-toggle-icon',
+        quickToggleTarget === 'dark' ? 'var(--icon-moon)' : 'var(--icon-sun)'
+      );
     });
   }
 
@@ -83,6 +131,8 @@
   }
 
   function bindThemeButtons() {
+    ensureQuickToggles();
+
     document.querySelectorAll('[data-theme-choice]').forEach((button) => {
       if (button.dataset.themeBound === 'true') {
         return;
@@ -91,6 +141,19 @@
       button.dataset.themeBound = 'true';
       button.addEventListener('click', () => {
         applyTheme(button.dataset.themeChoice);
+      });
+    });
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      if (button.dataset.themeBound === 'true') {
+        return;
+      }
+
+      button.dataset.themeBound = 'true';
+      button.addEventListener('click', () => {
+        const preference = root.dataset.themePreference || getStoredPreference();
+        const resolvedTheme = root.dataset.theme || getResolvedTheme(preference);
+        applyTheme(getQuickToggleTarget(resolvedTheme));
       });
     });
 

@@ -1,24 +1,15 @@
 const bcrypt = require('bcryptjs');
 
 const User = require('../models/User');
+const {
+  buildValidationError,
+  normalizeText,
+  parseIntegerId,
+  sendErrorResponse
+} = require('../utils/controllerHelpers');
 
 const PASSWORD_MIN_LENGTH = 8;
 const ALLOWED_ROLES = new Set(['admin', 'staff']);
-
-function buildValidationError(message, statusCode = 400) {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-}
-
-function normalizeText(value) {
-  if (value == null) {
-    return null;
-  }
-
-  const trimmedValue = String(value).trim();
-  return trimmedValue ? trimmedValue : null;
-}
 
 function validatePassword(value, fieldName = 'Password') {
   const password = normalizeText(value);
@@ -52,8 +43,7 @@ async function listUsers(req, res) {
     const users = await User.listAll();
     res.json(users.map(sanitizeUser));
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch users' });
+    sendErrorResponse(res, error, 'Failed to fetch users');
   }
 }
 
@@ -93,20 +83,16 @@ async function createUser(req, res) {
       user: sanitizeUser(user)
     });
   } catch (error) {
-    console.error(error);
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ error: 'Email or username is already in use' });
     }
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to create user' });
+    return sendErrorResponse(res, error, 'Failed to create user');
   }
 }
 
 async function resetUserPassword(req, res) {
   try {
-    const userId = parseInt(req.params.id, 10);
-    if (!Number.isInteger(userId)) {
-      throw buildValidationError('Invalid user id');
-    }
+    const userId = parseIntegerId(req.params.id, 'Invalid user id');
 
     const newPassword = validatePassword(req.body.newPassword, 'New password');
     const user = await User.findById(userId);
@@ -122,17 +108,13 @@ async function resetUserPassword(req, res) {
       user: sanitizeUser(updatedUser)
     });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to reset password' });
+    sendErrorResponse(res, error, 'Failed to reset password');
   }
 }
 
 async function updateUserRole(req, res) {
   try {
-    const userId = parseInt(req.params.id, 10);
-    if (!Number.isInteger(userId)) {
-      throw buildValidationError('Invalid user id');
-    }
+    const userId = parseIntegerId(req.params.id, 'Invalid user id');
 
     const role = normalizeText(req.body.role);
     if (!ALLOWED_ROLES.has(role)) {
@@ -171,8 +153,7 @@ async function updateUserRole(req, res) {
       user: sanitizeUser(updatedUser)
     });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update user role' });
+    sendErrorResponse(res, error, 'Failed to update user role');
   }
 }
 
@@ -216,8 +197,7 @@ async function changeOwnPassword(req, res) {
       user: sanitizeUser(updatedUser)
     });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update password' });
+    sendErrorResponse(res, error, 'Failed to update password');
   }
 }
 

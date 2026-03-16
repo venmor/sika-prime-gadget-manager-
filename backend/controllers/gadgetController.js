@@ -10,23 +10,14 @@ const Gadget = require('../models/Gadget');
 const LaptopSpec = require('../models/LaptopSpec');
 const PhoneSpec = require('../models/PhoneSpec');
 const { pool } = require('../config/db');
+const {
+  buildValidationError,
+  normalizeText,
+  parseIntegerId,
+  sendErrorResponse
+} = require('../utils/controllerHelpers');
 
 const ALLOWED_TYPES = new Set(['laptop', 'phone', 'other']);
-
-function buildValidationError(message, statusCode = 400) {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-}
-
-function normalizeText(value) {
-  if (value == null) {
-    return null;
-  }
-
-  const trimmed = String(value).trim();
-  return trimmed ? trimmed : null;
-}
 
 function parsePrice(value, fieldName, { required = false } = {}) {
   if (value == null || value === '') {
@@ -133,8 +124,7 @@ async function getAllGadgets(req, res) {
     const gadgets = await Gadget.findAll(req.query);
     res.json(gadgets);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch gadgets' });
+    sendErrorResponse(res, error, 'Failed to fetch gadgets');
   }
 }
 
@@ -147,8 +137,7 @@ async function getDeletedGadgets(req, res) {
     const gadgets = await Gadget.findDeleted();
     res.json(gadgets);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch deleted gadget history' });
+    sendErrorResponse(res, error, 'Failed to fetch deleted gadget history');
   }
 }
 
@@ -158,15 +147,14 @@ async function getDeletedGadgets(req, res) {
  */
 async function getGadgetById(req, res) {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseIntegerId(req.params.id, 'Invalid gadget id');
     const gadget = await Gadget.findById(id);
     if (!gadget) {
       return res.status(404).json({ error: 'Gadget not found' });
     }
     res.json(gadget);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch gadget' });
+    sendErrorResponse(res, error, 'Failed to fetch gadget');
   }
 }
 
@@ -191,8 +179,7 @@ async function createGadget(req, res) {
     if (connection) {
       await connection.rollback();
     }
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to create gadget' });
+    sendErrorResponse(res, error, 'Failed to create gadget');
   } finally {
     if (connection) {
       connection.release();
@@ -209,10 +196,7 @@ async function createGadget(req, res) {
 async function updateGadget(req, res) {
   let connection;
   try {
-    const id = parseInt(req.params.id, 10);
-    if (!Number.isInteger(id)) {
-      throw buildValidationError('Invalid gadget id');
-    }
+    const id = parseIntegerId(req.params.id, 'Invalid gadget id');
 
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -239,8 +223,7 @@ async function updateGadget(req, res) {
     if (connection) {
       await connection.rollback();
     }
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to update gadget' });
+    sendErrorResponse(res, error, 'Failed to update gadget');
   } finally {
     if (connection) {
       connection.release();
@@ -254,10 +237,7 @@ async function updateGadget(req, res) {
  */
 async function deleteGadget(req, res) {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (!Number.isInteger(id)) {
-      throw buildValidationError('Invalid gadget id');
-    }
+    const id = parseIntegerId(req.params.id, 'Invalid gadget id');
     const deletedBy = req.session?.user?.username || 'system';
     const success = await Gadget.delete(id, deletedBy);
     if (!success) {
@@ -265,8 +245,7 @@ async function deleteGadget(req, res) {
     }
     res.json({ message: 'Gadget deleted', deletedBy });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to delete gadget' });
+    sendErrorResponse(res, error, 'Failed to delete gadget');
   }
 }
 
@@ -276,10 +255,7 @@ async function deleteGadget(req, res) {
  */
 async function restoreGadget(req, res) {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (!Number.isInteger(id)) {
-      throw buildValidationError('Invalid gadget id');
-    }
+    const id = parseIntegerId(req.params.id, 'Invalid gadget id');
 
     const restored = await Gadget.restore(id);
     if (!restored) {
@@ -292,8 +268,7 @@ async function restoreGadget(req, res) {
       gadget
     });
   } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || 'Failed to restore gadget' });
+    sendErrorResponse(res, error, 'Failed to restore gadget');
   }
 }
 

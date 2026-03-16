@@ -1,8 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
   const { fetchWithAuth } = window.appAuth || {};
+  const {
+    clearMessage,
+    escapeHtml,
+    formatCurrency,
+    formatDate,
+    formatLabel,
+    parseErrorResponse,
+    setMessage,
+    toNumber
+  } = window.SikaPrimeAppUtils || {};
 
-  if (!fetchWithAuth) {
-    console.error('Authentication helpers are not available on the sales report page.');
+  if (
+    !fetchWithAuth
+    || !clearMessage
+    || !escapeHtml
+    || !formatCurrency
+    || !formatDate
+    || !formatLabel
+    || !parseErrorResponse
+    || !setMessage
+    || !toNumber
+  ) {
+    console.error('Shared app helpers are not available on the sales report page.');
     return;
   }
 
@@ -36,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ]);
 
       if (!salesResponse.ok) {
-        throw new Error(await parseError(salesResponse, 'Could not load sales.'));
+        throw new Error(await parseErrorResponse(salesResponse, 'Could not load sales.'));
       }
 
       if (!deletedItemsResponse.ok) {
-        throw new Error(await parseError(deletedItemsResponse, 'Could not load deleted items.'));
+        throw new Error(await parseErrorResponse(deletedItemsResponse, 'Could not load deleted items.'));
       }
 
       const [sales, deletedItems] = await Promise.all([
@@ -132,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (!response.ok) {
-        throw new Error(await parseError(response, 'Could not restore gadget.'));
+        throw new Error(await parseErrorResponse(response, 'Could not restore gadget.'));
       }
 
       const result = await response.json();
@@ -288,79 +308,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     return toNumber(sale.selling_price) - toNumber(sale.recovery_target);
-  }
-
-  function toNumber(value) {
-    const parsedValue = Number.parseFloat(value);
-    return Number.isFinite(parsedValue) ? parsedValue : 0;
-  }
-
-  function formatCurrency(value) {
-    return `K${toNumber(value).toFixed(2)}`;
-  }
-
-  function formatDate(value) {
-    if (!value) {
-      return '-';
-    }
-
-    const parsedDate = new Date(value);
-    if (Number.isNaN(parsedDate.getTime())) {
-      return '-';
-    }
-
-    return new Intl.DateTimeFormat('en-ZM', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(parsedDate);
-  }
-
-  function formatLabel(value) {
-    if (!value) {
-      return '-';
-    }
-
-    return String(value)
-      .replace(/[_-]+/g, ' ')
-      .replace(/\b\w/g, (character) => character.toUpperCase());
-  }
-
-  function setMessage(element, type, message) {
-    if (!element) {
-      return;
-    }
-
-    element.hidden = false;
-    element.textContent = message;
-    element.className = `page-message page-message--${type}`;
-  }
-
-  function clearMessage(element) {
-    if (!element) {
-      return;
-    }
-
-    element.hidden = true;
-    element.textContent = '';
-    element.className = 'page-message';
-  }
-
-  async function parseError(response, fallbackMessage) {
-    try {
-      const data = await response.json();
-      return data?.error || fallbackMessage;
-    } catch (error) {
-      return fallbackMessage;
-    }
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
   }
 });

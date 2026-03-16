@@ -1,8 +1,29 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const { fetchWithAuth, getCurrentUser } = window.appAuth || {};
+  const {
+    capitalize,
+    clearMessage,
+    compareStrings,
+    escapeHtml,
+    formatDate,
+    normalizeSearchValue,
+    parseErrorResponse,
+    setMessage
+  } = window.SikaPrimeAppUtils || {};
 
-  if (!fetchWithAuth || !getCurrentUser) {
-    console.error('Authentication helpers are not available on the users page.');
+  if (
+    !fetchWithAuth
+    || !getCurrentUser
+    || !capitalize
+    || !clearMessage
+    || !compareStrings
+    || !escapeHtml
+    || !formatDate
+    || !normalizeSearchValue
+    || !parseErrorResponse
+    || !setMessage
+  ) {
+    console.error('Shared app helpers are not available on the users page.');
     return;
   }
 
@@ -111,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const response = await fetchWithAuth('/api/users');
       if (!response.ok) {
-        throw new Error(await parseError(response, 'Could not load users.'));
+        throw new Error(await parseErrorResponse(response, 'Could not load users.'));
       }
 
       state.users = await response.json();
@@ -254,7 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td data-label="Role">
           <div class="${roleClass}">${escapeHtml(formatRole(user.role))}</div>
         </td>
-        <td class="user-row__cell" data-label="Last Login">${escapeHtml(formatDate(user.lastLoginAt))}</td>
+        <td class="user-row__cell" data-label="Last Login">${escapeHtml(formatDate(user.lastLoginAt, { fallback: 'Not recorded' }))}</td>
         <td data-label="Security">
           <div class="user-row__security">
             <strong>${escapeHtml(resetHint)}</strong>
@@ -429,7 +450,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (!response.ok) {
-        throw new Error(await parseError(response, 'Could not update password.'));
+        throw new Error(await parseErrorResponse(response, 'Could not update password.'));
       }
 
       const result = await response.json();
@@ -474,7 +495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (!response.ok) {
-        throw new Error(await parseError(response, 'Could not create user.'));
+        throw new Error(await parseErrorResponse(response, 'Could not create user.'));
       }
 
       const result = await response.json();
@@ -567,7 +588,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (!response.ok) {
-        throw new Error(await parseError(response, 'Could not reset password.'));
+        throw new Error(await parseErrorResponse(response, 'Could not reset password.'));
       }
 
       const result = await response.json();
@@ -633,7 +654,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (!response.ok) {
-        throw new Error(await parseError(response, 'Could not update role.'));
+        throw new Error(await parseErrorResponse(response, 'Could not update role.'));
       }
 
       const result = await response.json();
@@ -657,72 +678,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function getDisplayName(user) {
     return user.fullName || user.username || 'User';
-  }
-
-  function formatDate(value) {
-    if (!value) {
-      return 'Not recorded';
-    }
-
-    const parsedDate = new Date(value);
-    if (Number.isNaN(parsedDate.getTime())) {
-      return 'Not recorded';
-    }
-
-    return new Intl.DateTimeFormat('en-ZM', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(parsedDate);
-  }
-
-  function setMessage(element, type, message) {
-    if (!element) {
-      return;
-    }
-
-    element.hidden = false;
-    element.textContent = message;
-    element.className = `page-message page-message--${type}`;
-  }
-
-  function clearMessage(element) {
-    if (!element) {
-      return;
-    }
-
-    element.hidden = true;
-    element.textContent = '';
-    element.className = 'page-message';
-  }
-
-  async function parseError(response, fallbackMessage) {
-    try {
-      const data = await response.json();
-      return data?.error || fallbackMessage;
-    } catch (error) {
-      return fallbackMessage;
-    }
-  }
-
-  function escapeHtml(value) {
-    return String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-  }
-
-  function compareStrings(left, right) {
-    return left.localeCompare(right, undefined, {
-      numeric: true,
-      sensitivity: 'base'
-    });
-  }
-
-  function normalizeSearchValue(value) {
-    return String(value || '').trim().toLowerCase();
   }
 
   function getDefaultSortDirection(sortKey) {
@@ -774,7 +729,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.removeChild(helperInput);
   }
 
-  function capitalize(value) {
-    return value.charAt(0).toUpperCase() + value.slice(1);
-  }
 });

@@ -1,31 +1,18 @@
 const Gadget = require('../models/Gadget');
 const adExportService = require('../services/adExportService');
-
-function buildValidationError(message, statusCode = 400) {
-  const error = new Error(message);
-  error.statusCode = statusCode;
-  return error;
-}
-
-function normalizeText(value) {
-  if (value == null) {
-    return '';
-  }
-
-  return String(value).trim();
-}
+const {
+  buildValidationError,
+  normalizeText,
+  parseIntegerId,
+  sendErrorResponse
+} = require('../utils/controllerHelpers');
 
 function parseGadgetId(value) {
-  const parsedValue = Number.parseInt(value, 10);
-  if (!Number.isInteger(parsedValue)) {
-    throw buildValidationError('Valid gadgetId is required');
-  }
-
-  return parsedValue;
+  return parseIntegerId(value, 'Valid gadgetId is required');
 }
 
 function normalizeProcessedImageDataUrl(value) {
-  const normalizedValue = normalizeText(value);
+  const normalizedValue = normalizeText(value, { empty: '' });
   if (!normalizedValue) {
     return '';
   }
@@ -46,7 +33,7 @@ function buildBaseUrl(req) {
 }
 
 function buildFilename(gadget) {
-  const rawValue = normalizeText(gadget.model) || normalizeText(gadget.name) || 'ad_card';
+  const rawValue = normalizeText(gadget.model, { empty: '' }) || normalizeText(gadget.name, { empty: '' }) || 'ad_card';
   return rawValue
     .replace(/[^a-z0-9_-]+/gi, '_')
     .replace(/_+/g, '_')
@@ -57,7 +44,7 @@ function buildFilename(gadget) {
 async function exportAdPng(req, res) {
   try {
     const gadgetId = parseGadgetId(req.body.gadgetId);
-    const extraText = normalizeText(req.body.extraText).slice(0, 220);
+    const extraText = normalizeText(req.body.extraText, { empty: '' }).slice(0, 220);
     const processedImageDataUrl = normalizeProcessedImageDataUrl(req.body.processedImageDataUrl);
     const gadget = await Gadget.findById(gadgetId);
 
@@ -78,10 +65,7 @@ async function exportAdPng(req, res) {
     res.setHeader('Content-Length', pngBuffer.length);
     return res.send(pngBuffer);
   } catch (error) {
-    console.error(error);
-    return res.status(error.statusCode || 500).json({
-      error: error.message || 'Failed to export ad'
-    });
+    return sendErrorResponse(res, error, 'Failed to export ad');
   }
 }
 
