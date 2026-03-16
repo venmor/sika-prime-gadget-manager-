@@ -14,9 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewCard = document.getElementById('ad-card-preview');
   const previewSection = document.getElementById('ad-preview-section');
   const generateBtn = document.getElementById('generate-ad');
+  const previewGenerateBtn = document.getElementById('preview-generate-ad');
   const mobileGenerateBtn = document.getElementById('mobile-generate-ad');
   const messageEl = document.getElementById('detail-message');
   const extraTextInput = document.getElementById('ad-extra-text');
+  const previewMobileQuery = window.matchMedia('(max-width: 760px)');
 
   // Elements for sale functionality
   const saleForm = document.getElementById('sale-form');
@@ -25,11 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentGadget = null;
   const processedImageCache = new Map();
   const desktopExportLabel = generateBtn?.textContent || 'Export Ad PNG';
+  const previewExportLabel = previewGenerateBtn?.textContent || 'Export Ad PNG';
   const mobileExportLabel = mobileGenerateBtn?.textContent || 'Export Ad';
-  const exportButtons = [generateBtn, mobileGenerateBtn].filter(Boolean);
+  const exportButtons = [generateBtn, previewGenerateBtn, mobileGenerateBtn].filter(Boolean);
 
   function setPreviewOpenState(isOpen) {
     document.body.classList.toggle('detail-preview-open', Boolean(isOpen));
+  }
+
+  function syncPreviewMode() {
+    if (!previewSection) {
+      return;
+    }
+
+    if (!previewMobileQuery.matches) {
+      previewSection.open = true;
+    }
+
+    setPreviewOpenState(previewSection.open && previewMobileQuery.matches);
   }
 
   function setExportButtonState({ disabled, state = 'idle' } = {}) {
@@ -44,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
         button.textContent = 'Exporting...';
       } else if (button === generateBtn) {
         button.textContent = desktopExportLabel;
+      } else if (button === previewGenerateBtn) {
+        button.textContent = previewExportLabel;
       } else {
         button.textContent = mobileExportLabel;
       }
@@ -61,10 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (previewSection) {
-    setPreviewOpenState(previewSection.open);
+    syncPreviewMode();
     previewSection.addEventListener('toggle', () => {
-      setPreviewOpenState(previewSection.open);
+      setPreviewOpenState(previewSection.open && previewMobileQuery.matches);
     });
+  }
+
+  if (typeof previewMobileQuery.addEventListener === 'function') {
+    previewMobileQuery.addEventListener('change', syncPreviewMode);
+  } else if (typeof previewMobileQuery.addListener === 'function') {
+    previewMobileQuery.addListener(syncPreviewMode);
   }
 
   setExportButtonState({ disabled: true });
@@ -703,6 +726,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (generateBtn) {
     generateBtn.addEventListener('click', handleAdExport);
+  }
+
+  if (previewGenerateBtn) {
+    previewGenerateBtn.addEventListener('click', handleAdExport);
   }
 
   if (mobileGenerateBtn) {

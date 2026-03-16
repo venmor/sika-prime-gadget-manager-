@@ -132,10 +132,6 @@ body.users-page {
     linear-gradient(180deg, var(--bg-top) 0%, #f5f7ff 48%, var(--bg-base) 100%);
 }
 
-body.detail-preview-open {
-  overflow: hidden;
-}
-
 body::before,
 body::after,
 body.add-page::before,
