@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileSaveSaleBtn = document.getElementById('mobile-save-sale');
   let currentGadget = null;
   const processedImageCache = new Map();
-  const desktopExportLabel = generateBtn?.textContent || 'Export Ad PNG';
-  const previewExportLabel = previewGenerateBtn?.textContent || 'Export Ad PNG';
-  const mobileExportLabel = mobileGenerateBtn?.textContent || 'Export Ad';
+  const desktopExportLabel = generateBtn?.textContent || 'Export Poster PNG';
+  const previewExportLabel = previewGenerateBtn?.textContent || 'Export Poster PNG';
+  const mobileExportLabel = mobileGenerateBtn?.textContent || 'Export Poster';
   const exportButtons = [generateBtn, previewGenerateBtn, mobileGenerateBtn].filter(Boolean);
 
   function setPreviewOpenState(isOpen) {
