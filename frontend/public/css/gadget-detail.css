@@ -2697,7 +2697,7 @@ button[disabled] {
   }
 
   .detail-page {
-    padding-bottom: calc(8.4rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px));
   }
 
   body.detail-preview-open {
@@ -2705,18 +2705,13 @@ button[disabled] {
   }
 
   .detail-page__mobile-actions {
-    display: grid;
-  }
-
-  body.detail-preview-open .detail-page__mobile-actions {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(calc(100% + 1rem));
+    display: none;
   }
 
   #ad-card-section .detail-tool__action,
   #sale-form > button[type="submit"] {
-    display: none;
+    display: inline-flex;
+    width: 100%;
   }
 
   #ad-preview-section[open] {
